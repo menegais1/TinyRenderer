@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/Vectors/Vector2.cpp
+Vector2.h
+/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/Vectors/Vector2.h
+cmath
+-
+
+/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/Vectors/Vector2.h
+
+/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/Vectors/Vector3.cpp
+Vector3.h
+/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/Vectors/Vector3.h
+cmath
+-
+
+/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/Vectors/Vector3.h
+
+/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/main.cpp
+tgaimage.h
+/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/tgaimage.h
+Vectors/Vector2.h
+/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/Vectors/Vector2.h
+
+/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/tgaimage.h
+fstream
+-
+
