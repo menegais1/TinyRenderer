@@ -4,6 +4,7 @@
 
 #include "Vector2.h"
 #include <cmath>
+#include <stdexcept>
 
 template<class t>
 Vector2<t>::Vector2(t x, t y) : x(x), y(y) {
@@ -84,6 +85,14 @@ Vector2<t> Vector2<t>::cross(Vector2<t> v2) {
 template<class t>
 bool Vector2<t>::operator==(Vector2<t> v) {
     return v.x == x && v.y == y;
+}
+
+template<class t>
+t &Vector2<t>::operator[](int idx) {
+    if (idx == 0)return x;
+    if (idx == 1) return y;
+    else
+        throw std::out_of_range("Index out of bounds");
 }
 
 template

@@ -30,7 +30,9 @@ public:
 
     Vector2<t> operator*=(t v);
 
-    bool operator ==(Vector2<t> v);
+    bool operator==(Vector2<t> v);
+
+    t &operator[](int idx);
 
     t length();
 

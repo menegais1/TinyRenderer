@@ -4,6 +4,7 @@
 
 #include "Vector3.h"
 #include <cmath>
+#include <stdexcept>
 
 template<class t>
 Vector3<t>::Vector3(t x, t y, t z) : x(x), y(y), z(z) {
@@ -90,6 +91,15 @@ t Vector3<t>::angle(Vector3<t> v2) {
     float cosA = dot(v2) / (length() * v2.length());
     if (cosA > 1 || cosA < -1) cosA = (int) cosA;
     return acos(cosA);
+}
+
+template<class t>
+t &Vector3<t>::operator[](int idx) {
+    if (idx == 0) return x;
+    if (idx == 1) return y;
+    if (idx == 2) return z;
+    else
+        throw std::out_of_range("Index out of bounds");
 }
 
 template

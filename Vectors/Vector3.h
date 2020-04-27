@@ -31,6 +31,9 @@ public:
 
     Vector3<t> operator*=(t v);
 
+    t &operator[](int idx);
+
+
     t length();
 
     Vector3<t> unit();
