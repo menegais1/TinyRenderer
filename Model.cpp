@@ -132,3 +132,21 @@ void Model::renderWireframe(TGAImage &image, const TGAColor &color, int scaleX, 
     }
 }
 
+void Model::renderModel(TGAImage &image, int scaleX, int scaleY, dvec3 lightDirection) {
+    for (int i = 0; i < faces.size(); i++) {
+        Face f = faces[i];
+        dvec3 v0 = (vertices[f.vert.x] + dvec3(1.0, 1.0, 1.0));
+        dvec3 v1 = (vertices[f.vert.y] + dvec3(1.0, 1.0, 1.0));
+        dvec3 v2 = (vertices[f.vert.z] + dvec3(1.0, 1.0, 1.0));
+        dvec3 normal = (v1 - v0).cross(v2 - v0);
+        normal = normal.unit();
+        float lightIntensity = normal.dot(lightDirection);
+        if (lightIntensity >= 0) {
+            triangleBarycentric(ivec2(v0.x * scaleX, v0.y * scaleY), ivec2(v1.x * scaleX, v1.y * scaleY),
+                                ivec2(v2.x * scaleX, v2.y * scaleY), image,
+                                TGAColor(lightIntensity * 255, lightIntensity * 255, lightIntensity * 255,
+                                         rand() * 255));
+        }
+    }
+}
+

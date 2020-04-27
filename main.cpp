@@ -16,8 +16,8 @@ int main(int argc, char **argv) {
     triangleBarycentric(ivec2(0, 20), ivec2(30, 30), ivec2(0, 40), image, red);
     triangleBarycentric(ivec2(100, 100), ivec2(120, 100), ivec2(200, 200), image, white);
     Model m;
-  //  m.loadObj("../african_head.obj");
-  //  m.renderWireframe(image, white, halfWidth, halfHeight);
+    m.loadObj("../african_head.obj");
+    m.renderModel(image, halfWidth, halfHeight, dvec3(0, 0, 1).unit());
     image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
     image.write_tga_file("output.tga");
     return 0;

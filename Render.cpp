@@ -85,7 +85,6 @@ dvec3 barycentricCoordinates(ivec2 p0, ivec2 p1, ivec2 p2, ivec2 p) {
     dvec3 v1 = dvec3((p2 - p0).x, (p1 - p0).x, (p0 - p).x);
     dvec3 v2 = dvec3((p2 - p0).y, (p1 - p0).y, (p0 - p).y);
     dvec3 crossProduct = v1.cross(v2);
-    std::cout << crossProduct.x << " " << crossProduct.y << " " << crossProduct.z << std::endl;
     if (std::abs(crossProduct.z) < 1) return dvec3(-1, 1, 1);
     return dvec3(1.0 - (crossProduct.x + crossProduct.y) / crossProduct.z, crossProduct.y / crossProduct.z,
                  crossProduct.x / crossProduct.z);

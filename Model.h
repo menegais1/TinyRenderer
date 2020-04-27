@@ -29,6 +29,8 @@ public:
 
     void renderWireframe(TGAImage &image, const TGAColor &color, int scaleX, int scaleY);
 
+    void renderModel(TGAImage &image, int scaleX, int scaleY, dvec3 lightDirection);
+
 private:
     void readVertices(std::ifstream &file);
 
@@ -37,6 +39,7 @@ private:
     void readVerticesNormals(std::ifstream &file);
 
     void readFaces(std::ifstream &file);
+
 };
 
 
