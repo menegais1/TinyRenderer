@@ -35,10 +35,8 @@ void Model::readVertices(std::ifstream &file) {
         file >> x;
         file >> y;
         file >> z;
-        std::cout << "x:" << x << " y: " << y << " z: " << z << std::endl;
         vertices.push_back(dvec3(std::stod(x), std::stod(y), std::stod(z)));
     }
-    std::cout << vertices.size() << std::endl;
 }
 
 void Model::readTextureCoordinates(std::ifstream &file) {
@@ -50,8 +48,6 @@ void Model::readTextureCoordinates(std::ifstream &file) {
         if (s.at(0) == '#' || s.at(0) == '\n') {
             std::getline(file, s);
             continue;
-            std::cout << s << std::endl;
-
         } else if (s != "vt") {
             file.seekg(-s.size(), std::ios::cur);
             break;
@@ -59,10 +55,8 @@ void Model::readTextureCoordinates(std::ifstream &file) {
         file >> x;
         file >> y;
         file >> z;
-        std::cout << "x:" << x << " y: " << y << " z: " << z << std::endl;
         textureCoordinates.push_back(dvec3(std::stod(x), std::stod(y), std::stod(z)));
     }
-    std::cout << textureCoordinates.size() << std::endl;
 }
 
 void Model::readVerticesNormals(std::ifstream &file) {
@@ -81,10 +75,8 @@ void Model::readVerticesNormals(std::ifstream &file) {
         file >> x;
         file >> y;
         file >> z;
-        std::cout << "x:" << x << " y: " << y << " z: " << z << std::endl;
         verticesNormals.push_back(dvec3(std::stod(x), std::stod(y), std::stod(z)));
     }
-    std::cout << verticesNormals.size() << std::endl;
 }
 
 void Model::readFaces(std::ifstream &file) {
@@ -109,15 +101,11 @@ void Model::readFaces(std::ifstream &file) {
         std::getline(file, v2, '/');
         std::getline(file, vt2, '/');
         std::getline(file, vn2, '\n');
-        std::cout << "v:" << v0 << " vt: " << vt0 << " vn: " << vn0 << std::endl;
-        std::cout << "v:" << v1 << " vt: " << vt1 << " vn: " << vn1 << std::endl;
-        std::cout << "v:" << v2 << " vt: " << vt2 << " vn: " << vn2 << std::endl;
         ivec3 vert = ivec3(std::stoi(v0) - 1, std::stoi(v1) - 1, std::stoi(v2) - 1);
         ivec3 texture = ivec3(std::stoi(vt0) - 1, std::stoi(vt1) - 1, std::stoi(vt2) - 1);
         ivec3 normals = ivec3(std::stoi(vn0) - 1, std::stoi(vn1) - 1, std::stoi(vn2) - 1);
         faces.push_back({vert, texture, normals});
     }
-    std::cout << faces.size() << std::endl;
 }
 
 void Model::renderWireframe(TGAImage &image, const TGAColor &color, int scaleX, int scaleY) {
@@ -133,19 +121,24 @@ void Model::renderWireframe(TGAImage &image, const TGAColor &color, int scaleX, 
 }
 
 void Model::renderModel(TGAImage &image, int scaleX, int scaleY, dvec3 lightDirection) {
+    float *zBuffer = new float[width * height];
+    for (int j = 0; j < width * height; ++j) {
+        zBuffer[j] = std::numeric_limits<float>::min();
+    }
     for (int i = 0; i < faces.size(); i++) {
         Face f = faces[i];
         dvec3 v0 = (vertices[f.vert.x] + dvec3(1.0, 1.0, 1.0));
         dvec3 v1 = (vertices[f.vert.y] + dvec3(1.0, 1.0, 1.0));
         dvec3 v2 = (vertices[f.vert.z] + dvec3(1.0, 1.0, 1.0));
-        dvec3 normal = (v1 - v0).cross(v2 - v0);
+        dvec3 normal = (v2 - v0).cross(v1 - v0);
         normal = normal.unit();
         float lightIntensity = normal.dot(lightDirection);
         if (lightIntensity >= 0) {
-            triangleBarycentric(ivec2(v0.x * scaleX, v0.y * scaleY), ivec2(v1.x * scaleX, v1.y * scaleY),
-                                ivec2(v2.x * scaleX, v2.y * scaleY), image,
-                                TGAColor(lightIntensity * 255, lightIntensity * 255, lightIntensity * 255,
-                                         rand() * 255));
+            triangleBarycentric(dvec3( (v0.x * scaleX),  (v0.y * scaleY), v0.z),
+                                dvec3( (v1.x * scaleX), (v1.y * scaleY), v1.z),
+                                dvec3( (v2.x * scaleX), (v2.y * scaleY), v2.z),
+                                zBuffer, image,
+                                TGAColor(255 * lightIntensity, 255 * lightIntensity, 255 * lightIntensity, 255));
         }
     }
 }

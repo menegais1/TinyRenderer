@@ -81,7 +81,7 @@ void triangleLineSweep(ivec2 p0, ivec2 p1, ivec2 p2, TGAImage &image, TGAColor c
 }
 
 
-dvec3 barycentricCoordinates(ivec2 p0, ivec2 p1, ivec2 p2, ivec2 p) {
+dvec3 barycentricCoordinates(dvec3 p0, dvec3 p1, dvec3 p2, dvec3 p) {
     dvec3 v1 = dvec3((p2 - p0).x, (p1 - p0).x, (p0 - p).x);
     dvec3 v2 = dvec3((p2 - p0).y, (p1 - p0).y, (p0 - p).y);
     dvec3 crossProduct = v1.cross(v2);
@@ -90,8 +90,8 @@ dvec3 barycentricCoordinates(ivec2 p0, ivec2 p1, ivec2 p2, ivec2 p) {
                  crossProduct.x / crossProduct.z);
 }
 
-ivec2 getTriangleMaxBounds(ivec2 p0, ivec2 p1, ivec2 p2) {
-    ivec2 max = p0;
+dvec2 getTriangleMaxBounds(dvec3 p0, dvec3 p1, dvec3 p2) {
+    dvec2 max = dvec2(p0.x, p0.y);
     if (p1.x > max.x) max.x = p1.x;
     if (p2.x > max.x) max.x = p2.x;
     if (p1.y > max.y) max.y = p1.y;
@@ -99,8 +99,8 @@ ivec2 getTriangleMaxBounds(ivec2 p0, ivec2 p1, ivec2 p2) {
     return max;
 }
 
-ivec2 getTriangleMinBounds(ivec2 p0, ivec2 p1, ivec2 p2) {
-    ivec2 min = p0;
+dvec2 getTriangleMinBounds(dvec3 p0, dvec3 p1, dvec3 p2) {
+    dvec2 min = dvec2(p0.x, p0.y);
     if (p1.x < min.x) min.x = p1.x;
     if (p2.x < min.x) min.x = p2.x;
     if (p1.y < min.y) min.y = p1.y;
@@ -109,16 +109,21 @@ ivec2 getTriangleMinBounds(ivec2 p0, ivec2 p1, ivec2 p2) {
 }
 
 //Barycentric coordinates triangle generation algorithm
-void triangleBarycentric(ivec2 p0, ivec2 p1, ivec2 p2, TGAImage &image, TGAColor color) {
-    ivec2 minBounds = getTriangleMinBounds(p0, p1, p2);
-    ivec2 maxBounds = getTriangleMaxBounds(p0, p1, p2);
+void triangleBarycentric(dvec3 p0, dvec3 p1, dvec3 p2, float *zBuffer, TGAImage &image, TGAColor color) {
+    dvec2 minBounds = getTriangleMinBounds(p0, p1, p2);
+    dvec2 maxBounds = getTriangleMaxBounds(p0, p1, p2);
 
     for (int x = minBounds.x; x <= maxBounds.x; ++x) {
         for (int y = minBounds.y; y <= maxBounds.y; ++y) {
-            ivec2 p = ivec2(x, y);
+
+            dvec3 p = dvec3(x, y, 1);
             dvec3 barycentricP = barycentricCoordinates(p0, p1, p2, p);
             if (barycentricP.x < 0 || barycentricP.y < 0 || barycentricP.z < 0) continue;
-            image.set(x, y, color);
+            p.z = barycentricP.x * p0.z + barycentricP.y * p1.z + barycentricP.z * p2.z;
+            if (zBuffer[y * width + x] < p.z) {
+                zBuffer[y * width + x] = p.z;
+                image.set(x, y, color);
+            }
         }
     }
 }
