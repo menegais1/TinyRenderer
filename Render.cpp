@@ -2,7 +2,9 @@
 // Created by menegais1 on 27/04/2020.
 //
 
+#include <iostream>
 #include "Render.h"
+#include "Vectors/Vector3.h"
 
 void line(ivec2 p0, ivec2 p1, TGAImage &image, TGAColor color) {
     int height = abs(p1.y - p0.y);
@@ -47,7 +49,8 @@ void line(ivec2 p0, ivec2 p1, TGAImage &image, TGAColor color) {
     }
 }
 
-void triangle(ivec2 p0, ivec2 p1, ivec2 p2, TGAImage &image, TGAColor color) {
+//Line sweep triangle generation algorithm
+void triangleLineSweep(ivec2 p0, ivec2 p1, ivec2 p2, TGAImage &image, TGAColor color) {
     if (p0 == p1 || p1 == p2 || p0 == p2) return;
     if (p0.y > p1.y) std::swap(p0, p1);
     if (p0.y > p2.y) std::swap(p0, p2);
@@ -77,3 +80,46 @@ void triangle(ivec2 p0, ivec2 p1, ivec2 p2, TGAImage &image, TGAColor color) {
     }
 }
 
+
+dvec3 barycentricCoordinates(ivec2 p0, ivec2 p1, ivec2 p2, ivec2 p) {
+    dvec3 v1 = dvec3((p2 - p0).x, (p1 - p0).x, (p0 - p).x);
+    dvec3 v2 = dvec3((p2 - p0).y, (p1 - p0).y, (p0 - p).y);
+    dvec3 crossProduct = v1.cross(v2);
+    std::cout << crossProduct.x << " " << crossProduct.y << " " << crossProduct.z << std::endl;
+    if (std::abs(crossProduct.z) < 1) return dvec3(-1, 1, 1);
+    return dvec3(1.0 - (crossProduct.x + crossProduct.y) / crossProduct.z, crossProduct.y / crossProduct.z,
+                 crossProduct.x / crossProduct.z);
+}
+
+ivec2 getTriangleMaxBounds(ivec2 p0, ivec2 p1, ivec2 p2) {
+    ivec2 max = p0;
+    if (p1.x > max.x) max.x = p1.x;
+    if (p2.x > max.x) max.x = p2.x;
+    if (p1.y > max.y) max.y = p1.y;
+    if (p2.y > max.y) max.y = p2.y;
+    return max;
+}
+
+ivec2 getTriangleMinBounds(ivec2 p0, ivec2 p1, ivec2 p2) {
+    ivec2 min = p0;
+    if (p1.x < min.x) min.x = p1.x;
+    if (p2.x < min.x) min.x = p2.x;
+    if (p1.y < min.y) min.y = p1.y;
+    if (p2.y < min.y) min.y = p2.y;
+    return min;
+}
+
+//Barycentric coordinates triangle generation algorithm
+void triangleBarycentric(ivec2 p0, ivec2 p1, ivec2 p2, TGAImage &image, TGAColor color) {
+    ivec2 minBounds = getTriangleMinBounds(p0, p1, p2);
+    ivec2 maxBounds = getTriangleMaxBounds(p0, p1, p2);
+
+    for (int x = minBounds.x; x <= maxBounds.x; ++x) {
+        for (int y = minBounds.y; y <= maxBounds.y; ++y) {
+            ivec2 p = ivec2(x, y);
+            dvec3 barycentricP = barycentricCoordinates(p0, p1, p2, p);
+            if (barycentricP.x < 0 || barycentricP.y < 0 || barycentricP.z < 0) continue;
+            image.set(x, y, color);
+        }
+    }
+}

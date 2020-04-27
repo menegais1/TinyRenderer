@@ -82,7 +82,14 @@ t Vector3<t>::dot(Vector3<t> v2) {
 
 template<class t>
 Vector3<t> Vector3<t>::cross(Vector3<t> v2) {
-    return Vector3<t>();
+    return Vector3<t>(y * v2.z - z * v2.y, z * v2.x - x * v2.z, x * v2.y - y * v2.x);
+}
+
+template<class t>
+t Vector3<t>::angle(Vector3<t> v2) {
+    float cosA = dot(v2) / (length() * v2.length());
+    if (cosA > 1 || cosA < -1) cosA = (int) cosA;
+    return acos(cosA);
 }
 
 template

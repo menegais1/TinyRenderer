@@ -37,6 +37,8 @@ public:
 
     t dot(Vector3<t> v2);
 
+    t angle(Vector3<t> v2);
+
     Vector3<t> cross(Vector3<t> v2);
 
 };
