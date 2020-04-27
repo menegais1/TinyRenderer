@@ -125,20 +125,27 @@ void Model::renderModel(TGAImage &image, int scaleX, int scaleY, dvec3 lightDire
     for (int j = 0; j < width * height; ++j) {
         zBuffer[j] = std::numeric_limits<float>::min();
     }
+
+    TGAImage texture;
+    texture.read_tga_file("../african_head_diffuse.tga");
+    texture.flip_vertically();
     for (int i = 0; i < faces.size(); i++) {
         Face f = faces[i];
         dvec3 v0 = (vertices[f.vert.x] + dvec3(1.0, 1.0, 1.0));
         dvec3 v1 = (vertices[f.vert.y] + dvec3(1.0, 1.0, 1.0));
         dvec3 v2 = (vertices[f.vert.z] + dvec3(1.0, 1.0, 1.0));
+        v0 = dvec3((v0.x * scaleX), (v0.y * scaleY), v0.z);
+        v1 = dvec3((v1.x * scaleX), (v1.y * scaleY), v1.z);
+        v2 = dvec3((v2.x * scaleX), (v2.y * scaleY), v2.z);
+        dvec3 uv0 = textureCoordinates[f.texture.x];
+        dvec3 uv1 = textureCoordinates[f.texture.y];
+        dvec3 uv2 = textureCoordinates[f.texture.z];
         dvec3 normal = (v2 - v0).cross(v1 - v0);
         normal = normal.unit();
         float lightIntensity = normal.dot(lightDirection);
         if (lightIntensity >= 0) {
-            triangleBarycentric(dvec3( (v0.x * scaleX),  (v0.y * scaleY), v0.z),
-                                dvec3( (v1.x * scaleX), (v1.y * scaleY), v1.z),
-                                dvec3( (v2.x * scaleX), (v2.y * scaleY), v2.z),
-                                zBuffer, image,
-                                TGAColor(255 * lightIntensity, 255 * lightIntensity, 255 * lightIntensity, 255));
+            triangleBarycentric(v0, v1, v2, zBuffer, image,
+                                texture, dvec2(uv0.x, uv0.y), dvec2(uv1.x, uv1.y), dvec2(uv2.x, uv2.y),lightIntensity);
         }
     }
 }

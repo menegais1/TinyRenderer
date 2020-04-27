@@ -90,6 +90,10 @@ dvec3 barycentricCoordinates(dvec3 p0, dvec3 p1, dvec3 p2, dvec3 p) {
                  crossProduct.x / crossProduct.z);
 }
 
+dvec3 barycentricCoordinates(dvec2 p0, dvec2 p1, dvec2 p2, dvec2 p) {
+    return barycentricCoordinates(dvec3(p0.x, p0.y, 1), dvec3(p1.x, p1.y, 1), dvec3(p2.x, p2.y, 1), dvec3(p.x, p.y, 1));
+}
+
 dvec2 getTriangleMaxBounds(dvec3 p0, dvec3 p1, dvec3 p2) {
     dvec2 max = dvec2(p0.x, p0.y);
     if (p1.x > max.x) max.x = p1.x;
@@ -123,6 +127,32 @@ void triangleBarycentric(dvec3 p0, dvec3 p1, dvec3 p2, float *zBuffer, TGAImage 
             if (zBuffer[y * width + x] < p.z) {
                 zBuffer[y * width + x] = p.z;
                 image.set(x, y, color);
+            }
+        }
+    }
+}
+
+void triangleBarycentric(dvec3 p0, dvec3 p1, dvec3 p2, float *zBuffer, TGAImage &image, TGAImage &texture, dvec2 uv0,
+                         dvec2 uv1, dvec2 uv2, float lightIntensity) {
+    dvec2 minBounds = getTriangleMinBounds(p0, p1, p2);
+    dvec2 maxBounds = getTriangleMaxBounds(p0, p1, p2);
+
+    for (int x = minBounds.x; x <= maxBounds.x; ++x) {
+        for (int y = minBounds.y; y <= maxBounds.y; ++y) {
+
+            dvec3 p = dvec3(x, y, 1);
+            dvec3 barycentricP = barycentricCoordinates(p0, p1, p2, p);
+            if (barycentricP.x < 0 || barycentricP.y < 0 || barycentricP.z < 0) continue;
+            p.z = barycentricP.x * p0.z + barycentricP.y * p1.z + barycentricP.z * p2.z;
+            if (zBuffer[y * width + x] < p.z) {
+                zBuffer[y * width + x] = p.z;
+                dvec3 texturePoint;
+                texturePoint.x = barycentricP.x * uv0.x + barycentricP.y * uv1.x + barycentricP.z * uv2.x;
+                texturePoint.y = barycentricP.x * uv0.y + barycentricP.y * uv1.y + barycentricP.z * uv2.y;
+                TGAColor color = texture.get(texturePoint.x * texture.get_width(),
+                                             texturePoint.y * texture.get_height());
+                image.set(x, y, TGAColor(color.r * lightIntensity, color.g * lightIntensity, color.b * lightIntensity,
+                                         color.a));
             }
         }
     }
