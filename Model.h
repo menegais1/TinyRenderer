@@ -9,12 +9,13 @@
 #include <string>
 #include <fstream>
 #include "Vectors/Vector3.h"
+#include "tgaimage.h"
 
-typedef struct face{
+typedef struct face {
     ivec3 vert;
     ivec3 texture;
     ivec3 normal;
-}Face;
+} Face;
 
 class Model {
 public:
@@ -26,11 +27,16 @@ public:
 
     void loadObj(std::string filename);
 
+    void renderWireframe(TGAImage &image, const TGAColor &color, int scaleX, int scaleY);
+
 private:
-    void readVertices(std::ifstream& file);
-    void readTextureCoordinates(std::ifstream& file);
-    void readVerticesNormals(std::ifstream& file);
-    void readFaces(std::ifstream& file);
+    void readVertices(std::ifstream &file);
+
+    void readTextureCoordinates(std::ifstream &file);
+
+    void readVerticesNormals(std::ifstream &file);
+
+    void readFaces(std::ifstream &file);
 };
 
 

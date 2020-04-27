@@ -81,6 +81,11 @@ Vector2<t> Vector2<t>::cross(Vector2<t> v2) {
     return Vector2<t>();
 }
 
+template<class t>
+bool Vector2<t>::operator==(Vector2<t> v) {
+    return v.x == x && v.y == y;
+}
+
 template
 class Vector2<float>;
 

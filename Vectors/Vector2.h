@@ -30,6 +30,8 @@ public:
 
     Vector2<t> operator*=(t v);
 
+    bool operator ==(Vector2<t> v);
+
     t length();
 
     Vector2<t> unit();

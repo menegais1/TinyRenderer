@@ -3,6 +3,8 @@
 //
 
 #include "Model.h"
+#include "Vectors/Vector2.h"
+#include "Render.h"
 #include <fstream>
 #include <string>
 #include <iostream>
@@ -116,5 +118,17 @@ void Model::readFaces(std::ifstream &file) {
         faces.push_back({vert, texture, normals});
     }
     std::cout << faces.size() << std::endl;
+}
+
+void Model::renderWireframe(TGAImage &image, const TGAColor &color, int scaleX, int scaleY) {
+    for (int i = 0; i < faces.size(); i++) {
+        Face f = faces[i];
+        dvec3 v0 = (vertices[f.vert.x] + dvec3(1.0, 1.0, 1.0));
+        dvec3 v1 = (vertices[f.vert.y] + dvec3(1.0, 1.0, 1.0));
+        dvec3 v2 = (vertices[f.vert.z] + dvec3(1.0, 1.0, 1.0));
+        line(ivec2(v0.x * scaleX, v0.y * scaleY), ivec2(v1.x * scaleX, v1.y * scaleY), image, color);
+        line(ivec2(v0.x * scaleX, v0.y * scaleY), ivec2(v2.x * scaleX, v2.y * scaleY), image, color);
+        line(ivec2(v1.x * scaleX, v1.y * scaleY), ivec2(v2.x * scaleX, v2.y * scaleY), image, color);
+    }
 }
 
