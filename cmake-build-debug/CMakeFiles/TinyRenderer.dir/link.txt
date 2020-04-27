@@ -1,1 +1,1 @@
-/usr/bin/c++  -g   CMakeFiles/TinyRenderer.dir/Vectors/Vector3.cpp.o CMakeFiles/TinyRenderer.dir/Vectors/Vector2.cpp.o CMakeFiles/TinyRenderer.dir/main.cpp.o CMakeFiles/TinyRenderer.dir/tgaimage.cpp.o  -o TinyRenderer 
+/usr/bin/c++  -g   CMakeFiles/TinyRenderer.dir/Vectors/Vector3.cpp.o CMakeFiles/TinyRenderer.dir/Vectors/Vector2.cpp.o CMakeFiles/TinyRenderer.dir/main.cpp.o CMakeFiles/TinyRenderer.dir/tgaimage.cpp.o CMakeFiles/TinyRenderer.dir/Model.cpp.o  -o TinyRenderer 

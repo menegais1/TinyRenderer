@@ -85,6 +85,11 @@ Vector3<t> Vector3<t>::cross(Vector3<t> v2) {
     return Vector3<t>();
 }
 
-template class Vector3<float>;
-template class Vector3<double>;
-template class Vector3<int>;
+template
+class Vector3<float>;
+
+template
+class Vector3<double>;
+
+template
+class Vector3<int>;

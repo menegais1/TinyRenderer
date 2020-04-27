@@ -84,6 +84,12 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/Model.cpp">
+			<Option target="TinyRenderer"/>
+		</Unit>
+		<Unit filename="/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/Model.h">
+			<Option target="TinyRenderer"/>
+		</Unit>
 		<Unit filename="/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/Vectors/Vector2.cpp">
 			<Option target="TinyRenderer"/>
 		</Unit>

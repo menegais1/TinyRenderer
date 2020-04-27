@@ -4,6 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
+  "/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/Model.cpp" "/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/cmake-build-debug/CMakeFiles/TinyRenderer.dir/Model.cpp.o"
   "/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/Vectors/Vector2.cpp" "/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/cmake-build-debug/CMakeFiles/TinyRenderer.dir/Vectors/Vector2.cpp.o"
   "/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/Vectors/Vector3.cpp" "/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/cmake-build-debug/CMakeFiles/TinyRenderer.dir/Vectors/Vector3.cpp.o"
   "/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/main.cpp" "/home/menegais1/Documents/Projects/ComputerGraphics/Study/TinyRenderer/cmake-build-debug/CMakeFiles/TinyRenderer.dir/main.cpp.o"

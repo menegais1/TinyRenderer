@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/TinyRenderer.dir/Model.cpp.o"
   "CMakeFiles/TinyRenderer.dir/Vectors/Vector2.cpp.o"
   "CMakeFiles/TinyRenderer.dir/Vectors/Vector3.cpp.o"
   "CMakeFiles/TinyRenderer.dir/main.cpp.o"

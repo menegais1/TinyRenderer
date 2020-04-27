@@ -81,6 +81,11 @@ Vector2<t> Vector2<t>::cross(Vector2<t> v2) {
     return Vector2<t>();
 }
 
-template class Vector2<float>;
-template class Vector2<double>;
-template class Vector2<int>;
+template
+class Vector2<float>;
+
+template
+class Vector2<double>;
+
+template
+class Vector2<int>;

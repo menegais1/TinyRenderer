@@ -123,6 +123,33 @@ TinyRenderer/fast:
 	$(MAKE) -f CMakeFiles/TinyRenderer.dir/build.make CMakeFiles/TinyRenderer.dir/build
 .PHONY : TinyRenderer/fast
 
+Model.o: Model.cpp.o
+
+.PHONY : Model.o
+
+# target to build an object file
+Model.cpp.o:
+	$(MAKE) -f CMakeFiles/TinyRenderer.dir/build.make CMakeFiles/TinyRenderer.dir/Model.cpp.o
+.PHONY : Model.cpp.o
+
+Model.i: Model.cpp.i
+
+.PHONY : Model.i
+
+# target to preprocess a source file
+Model.cpp.i:
+	$(MAKE) -f CMakeFiles/TinyRenderer.dir/build.make CMakeFiles/TinyRenderer.dir/Model.cpp.i
+.PHONY : Model.cpp.i
+
+Model.s: Model.cpp.s
+
+.PHONY : Model.s
+
+# target to generate assembly for a file
+Model.cpp.s:
+	$(MAKE) -f CMakeFiles/TinyRenderer.dir/build.make CMakeFiles/TinyRenderer.dir/Model.cpp.s
+.PHONY : Model.cpp.s
+
 Vectors/Vector2.o: Vectors/Vector2.cpp.o
 
 .PHONY : Vectors/Vector2.o
@@ -240,6 +267,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... TinyRenderer"
+	@echo "... Model.o"
+	@echo "... Model.i"
+	@echo "... Model.s"
 	@echo "... Vectors/Vector2.o"
 	@echo "... Vectors/Vector2.i"
 	@echo "... Vectors/Vector2.s"

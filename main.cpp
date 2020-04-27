@@ -1,5 +1,7 @@
 #include "tgaimage.h"
 #include "Vectors/Vector2.h"
+#include "Model.h"
+#include <iostream>
 
 const TGAColor white = TGAColor(255, 255, 255, 255);
 const TGAColor red = TGAColor(255, 0, 0, 255);
@@ -8,7 +10,7 @@ const TGAColor red = TGAColor(255, 0, 0, 255);
 //Extra explanation: https://www.youtube.com/watch?v=IDFB5CDpLDE
 void line(ivec2 p0, ivec2 p1, TGAImage &image, TGAColor color) {
     int height = abs(p1.y - p0.y);
-    int width = abs(p1.x - p0.y);
+    int width = abs(p1.x - p0.x);
     bool transposed = false;
     //Transpose the line if the height is greater than the width, to not make changes to the for
     //bellow, we could just make two different fors
@@ -49,11 +51,24 @@ void line(ivec2 p0, ivec2 p1, TGAImage &image, TGAColor color) {
     }
 }
 
+const int width = 800;
+const int height = 800;
+const float halfWidth = width / 2.0;
+const float halfHeight = height / 2.0;
+
 int main(int argc, char **argv) {
-    TGAImage image(100, 100, TGAImage::RGB);
-    line(ivec2(13, 20), ivec2(80, 40), image, white);
-    line(ivec2(20, 13), ivec2(40, 80), image, red);
-    line(ivec2(80, 40), ivec2(13, 20), image, red);
+    TGAImage image(width, height, TGAImage::RGB);
+    Model m;
+    m.loadObj("../african_head.obj");
+    for (int i = 0; i < m.faces.size(); i++) {
+        Face f = m.faces[i];
+        dvec3 v0 = (m.vertices[f.vert.x] + dvec3(1.0, 1.0, 1.0));
+        dvec3 v1 = (m.vertices[f.vert.y] + dvec3(1.0, 1.0, 1.0));
+        dvec3 v2 = (m.vertices[f.vert.z] + dvec3(1.0, 1.0, 1.0));
+        line(ivec2(v0.x * halfWidth, v0.y * halfHeight), ivec2(v1.x * halfWidth, v1.y * halfHeight), image, white);
+        line(ivec2(v0.x * halfWidth, v0.y * halfHeight), ivec2(v2.x * halfWidth, v2.y * halfHeight), image, white);
+        line(ivec2(v1.x * halfWidth, v1.y * halfHeight), ivec2(v2.x * halfWidth, v2.y * halfHeight), image, white);
+    }
     image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
     image.write_tga_file("output.tga");
     return 0;
