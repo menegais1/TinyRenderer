@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <cmath>
 #include "Render.h"
 #include "Vectors/Vector3.h"
 
@@ -49,6 +50,7 @@ void line(ivec2 p0, ivec2 p1, TGAImage &image, TGAColor color) {
     }
 }
 
+//Triangle rasterization: http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
 //Line sweep triangle generation algorithm
 void triangleLineSweep(ivec2 p0, ivec2 p1, ivec2 p2, TGAImage &image, TGAColor color) {
     if (p0 == p1 || p1 == p2 || p0 == p2) return;
@@ -156,4 +158,56 @@ void triangleBarycentric(dvec3 p0, dvec3 p1, dvec3 p2, float *zBuffer, TGAImage 
             }
         }
     }
+}
+
+Matrix<float> rotateX(float angle) {
+    Matrix<float> R(4, 4);
+    R[0] = {1, 0, 0, 0};
+    R[1] = {0, cos(angle), -sin(angle), 0};
+    R[2] = {0, sin(angle), cos(angle), 0};
+    R[3] = {0, 0, 0, 1};
+    return R;
+}
+
+
+Matrix<float> rotateY(float angle) {
+    Matrix<float> R(4, 4);
+    R[0] = {cos(angle), 0, sin(angle), 0};
+    R[1] = {0, 1, 0, 0};
+    R[2] = {-sin(angle), 0, cos(angle), 0};
+    R[3] = {0, 0, 0, 1};
+    return R;
+}
+
+Matrix<float> rotateZ(float angle) {
+    Matrix<float> R(4, 4);
+    R[0] = {cos(angle), -sin(angle), 0, 0};
+    R[1] = {sin(angle), cos(angle), 0, 0};
+    R[2] = {0, 0, 1, 0};
+    R[3] = {0, 0, 0, 1};
+    return R;
+}
+
+Matrix<float> translate(dvec3 translation) {
+    Matrix<float> R(4, 4);
+    R[0] = {1, 0, 0, translation.x};
+    R[1] = {0, 1, 0, translation.y};
+    R[2] = {0, 0, 1, translation.z};
+    R[3] = {0, 0, 0, 1};
+    return R;
+}
+
+
+Matrix<float> vectorToMatrix(dvec3 vector) {
+    Matrix<float> V(4, 1);
+    V[0] = {vector.x};
+    V[1] = {vector.y};
+    V[2] = {vector.z};
+    V[3] = {1};
+    return V;
+}
+
+void initializeCameraMatrix(dvec3 cameraPos, dvec3 cameraPointOfInterest, dvec3 cameraUp, float cameraFieldOfView,
+                            float near, float far) {
+
 }

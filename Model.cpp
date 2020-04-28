@@ -123,7 +123,8 @@ void Model::renderWireframe(TGAImage &image, const TGAColor &color, int scaleX, 
 void Model::renderModel(TGAImage &image, int scaleX, int scaleY, dvec3 lightDirection) {
     float *zBuffer = new float[width * height];
     for (int j = 0; j < width * height; ++j) {
-        zBuffer[j] = std::numeric_limits<float>::min();
+        //Some strange bug happened
+        zBuffer[j] =  1.175494e-38;
     }
 
     TGAImage texture;
@@ -145,7 +146,7 @@ void Model::renderModel(TGAImage &image, int scaleX, int scaleY, dvec3 lightDire
         float lightIntensity = normal.dot(lightDirection);
         if (lightIntensity >= 0) {
             triangleBarycentric(v0, v1, v2, zBuffer, image,
-                                texture, dvec2(uv0[0], uv0[1]), dvec2(uv1.x, uv1.y), dvec2(uv2.x, uv2.y),lightIntensity);
+                                texture, dvec2(uv0.x, uv0.y), dvec2(uv1.x, uv1.y), dvec2(uv2.x, uv2.y), lightIntensity);
         }
     }
 }

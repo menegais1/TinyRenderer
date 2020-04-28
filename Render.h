@@ -9,11 +9,35 @@
 #include "Vectors/Vector2.h"
 #include "tgaimage.h"
 #include "Vectors/Vector3.h"
+#include "Vectors/Matrix.h"
 
-const int width = 600;
-const int height = 600;
+const int width = 1200;
+const int height = 1200;
 const float halfWidth = width / 2.0;
 const float halfHeight = height / 2.0;
+//Matrix<float> Proj(4, 4);
+//Matrix<float> Camera(4, 4);
+//
+//dvec3 cameraPos;
+//dvec3 cameraPointOfInterest;
+//dvec3 cameraUp;
+//float cameraFieldOfView;
+//float near;
+//float far;
+
+Matrix<float> rotateX(float angle);
+
+Matrix<float> rotateY(float angle);
+
+Matrix<float> rotateZ(float angle);
+
+Matrix<float> translate(dvec3 translation);
+
+Matrix<float> vectorToMatrix(dvec3 vector);
+
+void initializeCameraMatrix(dvec3 cameraPos, dvec3 cameraPointOfInterest, dvec3 cameraUp,
+                            float cameraFieldOfView, float near, float far);
+
 
 //Line sweep triangle generation algorithm
 void triangleLineSweep(ivec2 p0, ivec2 p1, ivec2 p2, TGAImage &image, TGAColor color);

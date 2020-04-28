@@ -2,6 +2,7 @@
 #include "Vectors/Vector2.h"
 #include "Model.h"
 #include "Render.h"
+#include "Vectors/Matrix.h"
 #include <iostream>
 
 const TGAColor white = TGAColor(255, 255, 255, 255);
