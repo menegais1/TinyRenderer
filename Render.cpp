@@ -7,7 +7,7 @@
 #include "Render.h"
 #include "Vectors/Vector3.h"
 
-void line(dvec3 p0, dvec3 p1,float* zBuffer, TGAImage &image, TGAColor color) {
+void line(dvec3 p0, dvec3 p1, float *zBuffer, TGAImage &image, TGAColor color) {
     int height = abs(p1.y - p0.y);
     int width = abs(p1.x - p0.x);
     bool transposed = false;
@@ -21,7 +21,7 @@ void line(dvec3 p0, dvec3 p1,float* zBuffer, TGAImage &image, TGAColor color) {
 
     //Guarantee that the line is always left to right
     if (p0.x > p1.x) {
-        std::swap(p0,p1);
+        std::swap(p0, p1);
     }
 
     int dx = p1.x - p0.x;
@@ -79,14 +79,6 @@ void triangleLineSweep(ivec2 p0, ivec2 p1, ivec2 p2, TGAImage &image, TGAColor c
             image.set(x, y, color);
         }
     }
-}
-
-float *initializeZBuffer() {
-    float *zBuffer = new float[width * height];
-    for (int j = 0; j < width * height; ++j) {
-        zBuffer[j] = 1.175494e-38;
-    }
-    return zBuffer;
 }
 
 dvec3 barycentricCoordinates(dvec3 p0, dvec3 p1, dvec3 p2, dvec3 p) {
@@ -166,20 +158,16 @@ void triangleBarycentric(dvec3 p0, dvec3 p1, dvec3 p2, float *zBuffer, TGAImage 
     }
 }
 
-dvec3 convertPointToScreenSpace(dvec3 p, Matrix<double> V, Matrix<double> P) {
-    Matrix<double> end = P * V * vectorToMatrix(p);
-    if(end[3][0] == 0) return dvec3(0,0,0);
-    return dvec3(end[0][0] / end[3][0], end[1][0] / end[3][0], end[2][0] / end[3][0]);
-}
+Matrix<double> viewport(int x, int y, int w, int h) {
+    Matrix<double> m = Matrix<double>::identity(4);
+    m[0][3] = x + w / 2.f;
+    m[1][3] = y + h / 2.f;
+    m[2][3] = depth / 2.f;
 
-Matrix<double> convertPointToClipSpace(dvec3 p, Matrix<double> P) {
-    Matrix<double> tmp = P * vectorToMatrix(p);
-    return tmp;
-}
-
-dvec3 convertPointToViewSpace(dvec3 p, Matrix<double> V) {
-    Matrix<double> tmp = V * vectorToMatrix(p);
-    return dvec3(tmp[0][0], tmp[1][0], tmp[2][0]);
+    m[0][0] = w / 2.f;
+    m[1][1] = h / 2.f;
+    m[2][2] = depth / 2.f;
+    return m;
 }
 
 Matrix<double> rotateX(float angle) {
@@ -234,4 +222,8 @@ Matrix<double> vectorToMatrix(dvec3 vector) {
     V[2] = {vector.z};
     V[3] = {1};
     return V;
+}
+
+dvec3 matrixToVector(Matrix<double> M) {
+    return dvec3(M[0][0] / M[3][0], M[1][0] / M[3][0], M[2][0] / M[3][0]);
 }

@@ -32,6 +32,8 @@ public:
 
     static Vector3<T> matrixToVector(Matrix<T> M);
 
+    static Matrix<T> identity(int size);
+
     void printMatrix();
 
     Matrix<T> invert();

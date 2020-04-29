@@ -10,11 +10,14 @@
 #include "tgaimage.h"
 #include "Vectors/Vector3.h"
 #include "Vectors/Matrix.h"
+#include "Camera.h"
 
 const int width = 1200;
 const int height = 1200;
 const float halfWidth = width / 2.0;
 const float halfHeight = height / 2.0;
+const int depth = 255;
+static Camera c = Camera();
 
 Matrix<double> rotateX(float angle);
 
@@ -28,14 +31,9 @@ Matrix<double> rescale(dvec3 scale);
 
 Matrix<double> vectorToMatrix(dvec3 vector);
 
-void initializeCameraMatrix(dvec3 cameraPos, dvec3 cameraPointOfInterest, dvec3 cameraUp,
-                            float cameraFieldOfView, float near, float far);
+dvec3 matrixToVector(Matrix<double> vector);
 
-dvec3 convertPointToScreenSpace(dvec3 p, Matrix<double> V, Matrix<double> P);
-
-dvec3 convertPointToViewSpace(dvec3 p, Matrix<double> V);
-
-Matrix<double> convertPointToClipSpace(dvec3 p, Matrix<double> P);
+Matrix<double> viewport(int x, int y, int w, int h);
 
 //Line sweep triangle generation algorithm
 void triangleLineSweep(ivec2 p0, ivec2 p1, ivec2 p2, TGAImage &image, TGAColor color);
@@ -49,8 +47,6 @@ void triangleBarycentric(dvec3 p0, dvec3 p1, dvec3 p2, float *zBuffer, TGAImage 
 //Bresenham line algorithm implementation
 //Extra explanation: https://www.youtube.com/watch?v=IDFB5CDpLDE
 void line(dvec3 p0, dvec3 p1, float *zBuffer, TGAImage &image, TGAColor color);
-
-float *initializeZBuffer();
 
 dvec3 barycentricCoordinates(dvec3 p0, dvec3 p1, dvec3 p2, dvec3 p);
 

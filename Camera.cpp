@@ -31,10 +31,10 @@ Matrix<double> Camera::setupProjectionMatrix(float cameraFieldOfView, float near
     this->cameraFieldOfView = cameraFieldOfView;
     this->near = near;
     this->far = far;
-    ProjectionMatrix[0] = {1.0 / std::tan(cameraFieldOfView / 2), 0, 0, 0};
-    ProjectionMatrix[1] = {0, 1.0 / std::tan(cameraFieldOfView / 2), 0, 0};
-    ProjectionMatrix[2] = {0, 0, (-2.0 * far * near) / (far - near), (-(far + near)) / (far - near)};
-    ProjectionMatrix[3] = {0, 0, -1, 0};
+    ProjectionMatrix[0] = {1, 0, 0, 0};
+    ProjectionMatrix[1] = {0, 1, 0, 0};
+    ProjectionMatrix[2] = {0, 0, 1, 0};
+    ProjectionMatrix[3] = {0, 0, -1 / cameraPos.z, 1};
     return ProjectionMatrix;
 }
 

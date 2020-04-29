@@ -112,6 +112,19 @@ Vector3<T> Matrix<T>::matrixToVector(Matrix<T> M) {
     return Vector3<T>(M[0][0] / M[3][0], M[1][0] / M[3][0], M[2][0] / M[3][0]);
 }
 
+template<class T>
+Matrix<T> Matrix<T>::identity(int size) {
+    Matrix<T> M(size, size);
+    for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; ++j) {
+            M.m[i][j] = 0;
+            if (i == j)
+                M.m[i][j] = 1;
+        }
+    }
+    return M;
+}
+
 template
 class Matrix<double>;
 
