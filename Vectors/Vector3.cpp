@@ -18,22 +18,22 @@ Vector3<t>::Vector3() : x(0), y(0), z(0) {
 }
 
 template<class t>
-Vector3<t> Vector3<t>::operator+(Vector3<t> v2) {
+Vector3<t> Vector3<t>::operator+(const Vector3<t> v2) const {
     return Vector3<t>(x + v2.x, y + v2.y, z + v2.z);
 }
 
 template<class t>
-Vector3<t> Vector3<t>::operator-(Vector3<t> v2) {
+Vector3<t> Vector3<t>::operator-(const Vector3<t> v2) const {
     return Vector3<t>(x - v2.x, y - v2.y, z - v2.z);
 }
 
 template<class t>
-Vector3<t> Vector3<t>::operator*(t v) {
+Vector3<t> Vector3<t>::operator*(const t v) const {
     return Vector3<t>(x * v, y * v, z * v);
 }
 
 template<class t>
-Vector3<t> Vector3<t>::operator/(t v) {
+Vector3<t> Vector3<t>::operator/(const t v) const {
     return Vector3<t>(x / v, y / v, z / v);
 }
 
@@ -83,7 +83,7 @@ t Vector3<t>::dot(Vector3<t> v2) {
 }
 
 template<class t>
-Vector3<t> Vector3<t>::cross(Vector3<t> v2) {
+Vector3<t> Vector3<t>::cross(const Vector3<t> v2) const {
     return Vector3<t>(y * v2.z - z * v2.y, z * v2.x - x * v2.z, x * v2.y - y * v2.x);
 }
 
@@ -104,7 +104,7 @@ t &Vector3<t>::operator[](int idx) {
 }
 
 template<class t>
-Vector3<t> Vector3<t>::operator-() {
+Vector3<t> Vector3<t>::operator-() const {
     return Vector3<t>(-x, -y, -z);
 }
 

@@ -12,7 +12,7 @@
 class Camera {
 public:
     Matrix<double> CameraMatrix;
-    Matrix<double> PerspectiveMatrix;
+    Matrix<double> ProjectionMatrix;
     dvec3 cameraPos;
     dvec3 cameraPointOfInterest;
     dvec3 upDirection;
@@ -20,11 +20,13 @@ public:
     float near;
     float far;
 
-    Camera(const dvec3 &cameraPos, const dvec3 &cameraPointOfInterest, const dvec3 &upDirection, float cameraFieldOfView,
-           float near, float far);
+    Camera();
 
-    void setupCameraMatrix();
-    void setupPerspectiveMatrix();
+    Matrix<double>
+    setupCameraMatrix(const dvec3 &cameraPos, const dvec3 &cameraPointOfInterest, const dvec3 &upDirection);
+
+    Matrix<double> setupProjectionMatrix(float cameraFieldOfView,
+                                         float near, float far);
 };
 
 

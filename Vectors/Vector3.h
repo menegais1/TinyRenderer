@@ -19,23 +19,23 @@ public:
 
     Vector3();
 
-    Vector3<t> operator+(Vector3<t> v2);
+    Vector3<t> operator+(Vector3<t> v2) const;
 
-    Vector3<t> operator-(Vector3<t> v2);
+    Vector3<t> operator-(const Vector3<t> v2) const;
 
-    Vector3<t> operator-();
+    Vector3<t> operator-() const;
 
-    Vector3<t> operator*(t v);
+    Vector3<t> operator*(t v) const;
 
-    Vector3<t> operator/(t v);
+    Vector3<t> operator/(t v) const;
 
-    Vector3<t> operator+=(Vector3<t> v1);
+    Vector3<t> operator+=(const Vector3<t> v1);
 
-    Vector3<t> operator-=(Vector3<t> v1);
+    Vector3<t> operator-=(const Vector3<t> v1);
 
-    Vector3<t> operator/=(t v);
+    Vector3<t> operator/=(const t v);
 
-    Vector3<t> operator*=(t v);
+    Vector3<t> operator*=(const t v);
 
     t &operator[](int idx);
 
@@ -55,7 +55,7 @@ public:
 
     t angle(Vector3<t> v2);
 
-    Vector3<t> cross(Vector3<t> v2);
+    Vector3<t> cross(const Vector3<t> v2) const;
 
 };
 
