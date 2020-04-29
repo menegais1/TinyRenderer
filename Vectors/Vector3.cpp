@@ -5,6 +5,7 @@
 #include "Vector3.h"
 #include <cmath>
 #include <stdexcept>
+#include <iostream>
 
 template<class t>
 Vector3<t>::Vector3(t x, t y, t z) : x(x), y(y), z(z) {
@@ -100,6 +101,36 @@ t &Vector3<t>::operator[](int idx) {
     if (idx == 2) return z;
     else
         throw std::out_of_range("Index out of bounds");
+}
+
+template<class t>
+Vector3<t> Vector3<t>::operator-() {
+    return Vector3<t>(-x, -y, -z);
+}
+
+template<class t>
+void Vector3<t>::print() {
+    std::cout << "x: " << x << " y: " << y << " z: " << z << std::endl;
+}
+
+template<class t>
+bool Vector3<t>::operator==(const Vector3 &rhs) const {
+    return x == rhs.x &&
+           y == rhs.y &&
+           z == rhs.z;
+}
+
+template<class t>
+bool Vector3<t>::operator!=(const Vector3 &rhs) const {
+    return !(rhs == *this);
+}
+
+template<class t>
+Vector3<t> &Vector3<t>::operator=(Matrix<double> rhs) {
+    x = rhs[0][0] / rhs[3][0];
+    y = rhs[1][0] / rhs[3][0];
+    z = rhs[2][0] / rhs[3][0];
+    return *this;
 }
 
 template

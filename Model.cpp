@@ -114,9 +114,9 @@ void Model::renderWireframe(TGAImage &image, const TGAColor &color, int scaleX, 
         dvec3 v0 = (vertices[f.vert.x] + dvec3(1.0, 1.0, 1.0));
         dvec3 v1 = (vertices[f.vert.y] + dvec3(1.0, 1.0, 1.0));
         dvec3 v2 = (vertices[f.vert.z] + dvec3(1.0, 1.0, 1.0));
-        line(ivec2(v0.x * scaleX, v0.y * scaleY), ivec2(v1.x * scaleX, v1.y * scaleY), image, color);
-        line(ivec2(v0.x * scaleX, v0.y * scaleY), ivec2(v2.x * scaleX, v2.y * scaleY), image, color);
-        line(ivec2(v1.x * scaleX, v1.y * scaleY), ivec2(v2.x * scaleX, v2.y * scaleY), image, color);
+//        line(ivec2(v0.x * scaleX, v0.y * scaleY), ivec2(v1.x * scaleX, v1.y * scaleY), image, color);
+//        line(ivec2(v0.x * scaleX, v0.y * scaleY), ivec2(v2.x * scaleX, v2.y * scaleY), image, color);
+//        line(ivec2(v1.x * scaleX, v1.y * scaleY), ivec2(v2.x * scaleX, v2.y * scaleY), image, color);
     }
 }
 
@@ -124,7 +124,7 @@ void Model::renderModel(TGAImage &image, int scaleX, int scaleY, dvec3 lightDire
     float *zBuffer = new float[width * height];
     for (int j = 0; j < width * height; ++j) {
         //Some strange bug happened
-        zBuffer[j] =  1.175494e-38;
+        zBuffer[j] = 1.175494e-38;
     }
 
     TGAImage texture;

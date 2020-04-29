@@ -7,7 +7,7 @@
 #include "Render.h"
 #include "Vectors/Vector3.h"
 
-void line(ivec2 p0, ivec2 p1, TGAImage &image, TGAColor color) {
+void line(dvec3 p0, dvec3 p1,float* zBuffer, TGAImage &image, TGAColor color) {
     int height = abs(p1.y - p0.y);
     int width = abs(p1.x - p0.x);
     bool transposed = false;
@@ -21,8 +21,7 @@ void line(ivec2 p0, ivec2 p1, TGAImage &image, TGAColor color) {
 
     //Guarantee that the line is always left to right
     if (p0.x > p1.x) {
-        std::swap(p0.x, p1.x);
-        std::swap(p0.y, p1.y);
+        std::swap(p0,p1);
     }
 
     int dx = p1.x - p0.x;
@@ -82,6 +81,13 @@ void triangleLineSweep(ivec2 p0, ivec2 p1, ivec2 p2, TGAImage &image, TGAColor c
     }
 }
 
+float *initializeZBuffer() {
+    float *zBuffer = new float[width * height];
+    for (int j = 0; j < width * height; ++j) {
+        zBuffer[j] = 1.175494e-38;
+    }
+    return zBuffer;
+}
 
 dvec3 barycentricCoordinates(dvec3 p0, dvec3 p1, dvec3 p2, dvec3 p) {
     dvec3 v1 = dvec3((p2 - p0).x, (p1 - p0).x, (p0 - p).x);
@@ -160,8 +166,24 @@ void triangleBarycentric(dvec3 p0, dvec3 p1, dvec3 p2, float *zBuffer, TGAImage 
     }
 }
 
-Matrix<float> rotateX(float angle) {
-    Matrix<float> R(4, 4);
+dvec3 convertPointToScreenSpace(dvec3 p, Matrix<double> V, Matrix<double> P) {
+    Matrix<double> end = P * V * vectorToMatrix(p);
+    if(end[3][0] == 0) return dvec3(0,0,0);
+    return dvec3(end[0][0] / end[3][0], end[1][0] / end[3][0], end[2][0] / end[3][0]);
+}
+
+Matrix<double> convertPointToClipSpace(dvec3 p, Matrix<double> P) {
+    Matrix<double> tmp = P * vectorToMatrix(p);
+    return tmp;
+}
+
+dvec3 convertPointToViewSpace(dvec3 p, Matrix<double> V) {
+    Matrix<double> tmp = V * vectorToMatrix(p);
+    return dvec3(tmp[0][0], tmp[1][0], tmp[2][0]);
+}
+
+Matrix<double> rotateX(float angle) {
+    Matrix<double> R(4, 4);
     R[0] = {1, 0, 0, 0};
     R[1] = {0, cos(angle), -sin(angle), 0};
     R[2] = {0, sin(angle), cos(angle), 0};
@@ -169,9 +191,8 @@ Matrix<float> rotateX(float angle) {
     return R;
 }
 
-
-Matrix<float> rotateY(float angle) {
-    Matrix<float> R(4, 4);
+Matrix<double> rotateY(float angle) {
+    Matrix<double> R(4, 4);
     R[0] = {cos(angle), 0, sin(angle), 0};
     R[1] = {0, 1, 0, 0};
     R[2] = {-sin(angle), 0, cos(angle), 0};
@@ -179,8 +200,8 @@ Matrix<float> rotateY(float angle) {
     return R;
 }
 
-Matrix<float> rotateZ(float angle) {
-    Matrix<float> R(4, 4);
+Matrix<double> rotateZ(float angle) {
+    Matrix<double> R(4, 4);
     R[0] = {cos(angle), -sin(angle), 0, 0};
     R[1] = {sin(angle), cos(angle), 0, 0};
     R[2] = {0, 0, 1, 0};
@@ -188,8 +209,8 @@ Matrix<float> rotateZ(float angle) {
     return R;
 }
 
-Matrix<float> translate(dvec3 translation) {
-    Matrix<float> R(4, 4);
+Matrix<double> translate(dvec3 translation) {
+    Matrix<double> R(4, 4);
     R[0] = {1, 0, 0, translation.x};
     R[1] = {0, 1, 0, translation.y};
     R[2] = {0, 0, 1, translation.z};
@@ -197,17 +218,20 @@ Matrix<float> translate(dvec3 translation) {
     return R;
 }
 
+Matrix<double> rescale(dvec3 scale) {
+    Matrix<double> S(4, 4);
+    S[0] = {scale.x, 0, 0, 0};
+    S[1] = {0, scale.y, 0, 0};
+    S[2] = {0, 0, scale.z, 0};
+    S[3] = {0, 0, 0, 1};
+    return S;
+}
 
-Matrix<float> vectorToMatrix(dvec3 vector) {
-    Matrix<float> V(4, 1);
+Matrix<double> vectorToMatrix(dvec3 vector) {
+    Matrix<double> V(4, 1);
     V[0] = {vector.x};
     V[1] = {vector.y};
     V[2] = {vector.z};
     V[3] = {1};
     return V;
-}
-
-void initializeCameraMatrix(dvec3 cameraPos, dvec3 cameraPointOfInterest, dvec3 cameraUp, float cameraFieldOfView,
-                            float near, float far) {
-
 }

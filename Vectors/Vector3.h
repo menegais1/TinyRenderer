@@ -5,6 +5,10 @@
 #ifndef TINYRENDERER_VECTOR3_H
 #define TINYRENDERER_VECTOR3_H
 
+#include "Matrix.h"
+
+template<class t>
+class Matrix;
 
 template<class t>
 struct Vector3 {
@@ -18,6 +22,8 @@ public:
     Vector3<t> operator+(Vector3<t> v2);
 
     Vector3<t> operator-(Vector3<t> v2);
+
+    Vector3<t> operator-();
 
     Vector3<t> operator*(t v);
 
@@ -33,6 +39,13 @@ public:
 
     t &operator[](int idx);
 
+    bool operator==(const Vector3 &rhs) const;
+
+    bool operator!=(const Vector3 &rhs) const;
+
+    Vector3<t> &operator=(Matrix<double> rhs);
+
+    void print();
 
     t length();
 
