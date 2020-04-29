@@ -25,8 +25,7 @@ public:
     Matrix<double>
     setupCameraMatrix(const dvec3 &cameraPos, const dvec3 &cameraPointOfInterest, const dvec3 &upDirection);
 
-    Matrix<double> setupProjectionMatrix(float cameraFieldOfView,
-                                         float near, float far);
+    Matrix<double> setupProjectionMatrix();
 };
 
 

@@ -27,14 +27,13 @@ Camera::setupCameraMatrix(const dvec3 &cameraPos, const dvec3 &cameraPointOfInte
     return CameraMatrix;
 }
 
-Matrix<double> Camera::setupProjectionMatrix(float cameraFieldOfView, float near, float far) {
-    this->cameraFieldOfView = cameraFieldOfView;
-    this->near = near;
-    this->far = far;
+Matrix<double> Camera::setupProjectionMatrix() {
     ProjectionMatrix[0] = {1, 0, 0, 0};
     ProjectionMatrix[1] = {0, 1, 0, 0};
     ProjectionMatrix[2] = {0, 0, 1, 0};
-    ProjectionMatrix[3] = {0, 0, -1 / cameraPos.z, 1};
+    //For now, we are considering that the camera is always at a distance z to the image plane, so the distance must be positive
+    double dist = std::abs(cameraPos.z);
+    ProjectionMatrix[3] = {0, 0, -1 / dist, 1};
     return ProjectionMatrix;
 }
 

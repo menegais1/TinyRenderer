@@ -126,23 +126,22 @@ void Model::renderModel(TGAImage &image, int scaleX, int scaleY, dvec3 lightDire
         //Some strange bug happened
         zBuffer[j] = -10000;
     }
-    c.setupCameraMatrix(dvec3(0, 0, 3), dvec3(0, 0, 0), dvec3(0, 1, 0));
-    c.setupProjectionMatrix(3.145 / 1.5, 1, 1000);
+    c.setupCameraMatrix(dvec3(3,3, -3), dvec3(0, 0, 0), dvec3(0, 1, 0));
+    c.setupProjectionMatrix();
     TGAImage texture;
     texture.read_tga_file("../african_head_diffuse.tga");
     texture.flip_vertically();
     auto Viewport = viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
-
     for (int i = 0; i < faces.size(); i++) {
         Face f = faces[i];
         dvec3 v0 = (vertices[f.vert.x]);
         dvec3 v1 = (vertices[f.vert.y]);
         dvec3 v2 = (vertices[f.vert.z]);
-        v0 = matrixToVector(Viewport * c.ProjectionMatrix *
+        v0 = matrixToVector(Viewport * c.ProjectionMatrix * c.CameraMatrix *
                             vectorToMatrix(v0));
-        v1 = matrixToVector(Viewport * c.ProjectionMatrix *
+        v1 = matrixToVector(Viewport * c.ProjectionMatrix * c.CameraMatrix *
                             vectorToMatrix(v1));
-        v2 = matrixToVector(Viewport * c.ProjectionMatrix *
+        v2 = matrixToVector(Viewport * c.ProjectionMatrix * c.CameraMatrix *
                             vectorToMatrix(v2));
         dvec3 normal = (v2 - v0).cross(v1 - v0);
         normal = normal.unit();
