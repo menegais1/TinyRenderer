@@ -126,7 +126,7 @@ void Model::renderModel(TGAImage &image, int scaleX, int scaleY, dvec3 lightDire
         //Some strange bug happened
         zBuffer[j] = -10000;
     }
-    c.setupCameraMatrix(dvec3(3,3, -3), dvec3(0, 0, 0), dvec3(0, 1, 0));
+    c.setupCameraMatrix(dvec3(0, 0, 3), dvec3(0, 0, 0), dvec3(0, 1, 0));
     c.setupProjectionMatrix();
     TGAImage texture;
     texture.read_tga_file("../african_head_diffuse.tga");
@@ -137,23 +137,26 @@ void Model::renderModel(TGAImage &image, int scaleX, int scaleY, dvec3 lightDire
         dvec3 v0 = (vertices[f.vert.x]);
         dvec3 v1 = (vertices[f.vert.y]);
         dvec3 v2 = (vertices[f.vert.z]);
+        dvec3 normal = (v2 - v0).cross(v1 - v0);
+        normal = normal.unit();
+        float lightIntensity = normal.dot(lightDirection);
+        dvec3 cameraDirection = (v0 - c.cameraPos).unit();
+        float backfaceCulling = normal.dot(cameraDirection);
         v0 = matrixToVector(Viewport * c.ProjectionMatrix * c.CameraMatrix *
                             vectorToMatrix(v0));
         v1 = matrixToVector(Viewport * c.ProjectionMatrix * c.CameraMatrix *
                             vectorToMatrix(v1));
         v2 = matrixToVector(Viewport * c.ProjectionMatrix * c.CameraMatrix *
                             vectorToMatrix(v2));
-        dvec3 normal = (v2 - v0).cross(v1 - v0);
-        normal = normal.unit();
-        float lightIntensity = normal.dot(lightDirection);
-        if (lightIntensity >= 0) {
+        if (backfaceCulling >= 0) {
             dvec3 uv0 = textureCoordinates[f.texture.x];
             dvec3 uv1 = textureCoordinates[f.texture.y];
             dvec3 uv2 = textureCoordinates[f.texture.z];
             triangleBarycentric(v0,
                                 v1,
                                 v2, zBuffer, image,
-                                texture, dvec2(uv0.x, uv0.y), dvec2(uv1.x, uv1.y), dvec2(uv2.x, uv2.y), lightIntensity);
+                                texture, dvec2(uv0.x, uv0.y), dvec2(uv1.x, uv1.y), dvec2(uv2.x, uv2.y),
+                                lightIntensity >= 0 ? lightIntensity : 0);
         }
     }
 }
