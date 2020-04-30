@@ -124,14 +124,14 @@ void Model::renderModel(TGAImage &image, int scaleX, int scaleY, dvec3 lightDire
     float *zBuffer = new float[width * height];
     for (int j = 0; j < width * height; ++j) {
         //Some strange bug happened
-        zBuffer[j] = -10000;
+        zBuffer[j] = -1000000;
     }
-    c.setupCameraMatrix(dvec3(0, 0, 3), dvec3(0, 0, 0), dvec3(0, 1, 0));
-    c.setupProjectionMatrix();
+    c.lookAt(dvec3(0, 0, 3), dvec3(0, 0, 0), dvec3(0, 1, 0));
+    c.projection(-1.0 / (c.cameraPos - c.cameraPointOfInterest).length());
+    c.viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
     TGAImage texture;
     texture.read_tga_file("../african_head_diffuse.tga");
     texture.flip_vertically();
-    auto Viewport = viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
     for (int i = 0; i < faces.size(); i++) {
         Face f = faces[i];
         dvec3 v0 = (vertices[f.vert.x]);
@@ -142,11 +142,11 @@ void Model::renderModel(TGAImage &image, int scaleX, int scaleY, dvec3 lightDire
         float lightIntensity = normal.dot(lightDirection);
         dvec3 cameraDirection = (v0 - c.cameraPos).unit();
         float backfaceCulling = normal.dot(cameraDirection);
-        v0 = matrixToVector(Viewport * c.ProjectionMatrix * c.CameraMatrix *
+        v0 = matrixToVector(c.Viewport * c.Projection * c.View *
                             vectorToMatrix(v0));
-        v1 = matrixToVector(Viewport * c.ProjectionMatrix * c.CameraMatrix *
+        v1 = matrixToVector(c.Viewport * c.Projection * c.View *
                             vectorToMatrix(v1));
-        v2 = matrixToVector(Viewport * c.ProjectionMatrix * c.CameraMatrix *
+        v2 = matrixToVector(c.Viewport * c.Projection * c.View *
                             vectorToMatrix(v2));
         if (backfaceCulling >= 0) {
             dvec3 uv0 = textureCoordinates[f.texture.x];

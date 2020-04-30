@@ -11,21 +11,20 @@
 
 class Camera {
 public:
-    Matrix<double> CameraMatrix;
-    Matrix<double> ProjectionMatrix;
+    Matrix<double> View;
+    Matrix<double> Projection;
+    Matrix<double> Viewport;
     dvec3 cameraPos;
     dvec3 cameraPointOfInterest;
-    dvec3 upDirection;
-    float cameraFieldOfView;
-    float near;
-    float far;
+    dvec3 cameraDirection;
 
     Camera();
 
-    Matrix<double>
-    setupCameraMatrix(const dvec3 &cameraPos, const dvec3 &cameraPointOfInterest, const dvec3 &upDirection);
+    Matrix<double> lookAt(const dvec3 &cameraPos, const dvec3 &cameraPointOfInterest, const dvec3 &up);
 
-    Matrix<double> setupProjectionMatrix();
+    Matrix<double> projection(float coefficient);
+
+    Matrix<double> viewport(int x, int y, int w, int h);
 };
 
 

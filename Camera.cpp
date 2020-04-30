@@ -8,14 +8,13 @@
 #include "Render.h"
 
 
-Matrix<double>
-Camera::setupCameraMatrix(const dvec3 &cameraPos, const dvec3 &cameraPointOfInterest, const dvec3 &upDirection) {
+Matrix<double> Camera::lookAt(const dvec3 &cameraPos, const dvec3 &cameraPointOfInterest, const dvec3 &up) {
     this->cameraPos = cameraPos;
     this->cameraPointOfInterest = cameraPointOfInterest;
-    this->upDirection = upDirection;
     dvec3 d = (cameraPos - cameraPointOfInterest).unit();
-    dvec3 r = upDirection.cross(d).unit();
+    dvec3 r = up.cross(d).unit();
     dvec3 u = d.cross(r).unit();
+    this->cameraDirection = -d;
     Matrix<double> T = translate(dvec3(-cameraPos.x, -cameraPos.y, -cameraPos.z));
     Matrix<double> R(4, 4);
     R[0] = {r.x, r.y, r.z, 0};
@@ -23,21 +22,31 @@ Camera::setupCameraMatrix(const dvec3 &cameraPos, const dvec3 &cameraPointOfInte
     R[2] = {d.x, d.y, d.z, 0};
     R[3] = {0, 0, 0, 1};
 
-    CameraMatrix = R * T;
-    return CameraMatrix;
+    View = R * T;
+    return View;
 }
 
-Matrix<double> Camera::setupProjectionMatrix() {
-    ProjectionMatrix[0] = {1, 0, 0, 0};
-    ProjectionMatrix[1] = {0, 1, 0, 0};
-    ProjectionMatrix[2] = {0, 0, 1, 0};
-    //For now, we are considering that the camera is always at a distance z to the image plane, so the distance must be positive
-    double dist = std::abs(cameraPos.z);
-    ProjectionMatrix[3] = {0, 0, -1 / dist, 1};
-    return ProjectionMatrix;
+Matrix<double> Camera::projection(float coefficient) {
+    Projection[0] = {1, 0, 0, 0};
+    Projection[1] = {0, 1, 0, 0};
+    Projection[2] = {0, 0, 1, 0};
+    Projection[3] = {0, 0, coefficient, 1};
+    return Projection;
+}
+
+Matrix<double> Camera::viewport(int x, int y, int w, int h) {
+    Viewport[0][3] = x + w / 2.f;
+    Viewport[1][3] = y + h / 2.f;
+    Viewport[2][3] = depth / 2.f;
+
+    Viewport[0][0] = w / 2.f;
+    Viewport[1][1] = h / 2.f;
+    Viewport[2][2] = depth / 2.f;
+    return Viewport;
 }
 
 Camera::Camera() {
-    CameraMatrix = Matrix<double>(4, 4);
-    ProjectionMatrix = Matrix<double>(4, 4);
+    View = Matrix<double>::identity(4);
+    Projection = Matrix<double>::identity(4);
+    Viewport = Matrix<double>::identity(4);
 }

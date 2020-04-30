@@ -158,18 +158,6 @@ void triangleBarycentric(dvec3 p0, dvec3 p1, dvec3 p2, float *zBuffer, TGAImage 
     }
 }
 
-Matrix<double> viewport(int x, int y, int w, int h) {
-    Matrix<double> m = Matrix<double>::identity(4);
-    m[0][3] = x + w / 2.f;
-    m[1][3] = y + h / 2.f;
-    m[2][3] = depth / 2.f;
-
-    m[0][0] = w / 2.f;
-    m[1][1] = h / 2.f;
-    m[2][2] = depth / 2.f;
-    return m;
-}
-
 Matrix<double> rotateX(float angle) {
     Matrix<double> R(4, 4);
     R[0] = {1, 0, 0, 0};
