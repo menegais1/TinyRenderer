@@ -11,49 +11,59 @@
 #include "Vectors/Vector3.h"
 #include "Vectors/Matrix.h"
 #include "Camera.h"
+#include "IShader.h"
 
-const int width = 1200;
-const int height = 1200;
-const float halfWidth = width / 2.0;
-const float halfHeight = height / 2.0;
-const int depth = 255;
-static Camera c = Camera();
 
-Matrix<double> rotateX(float angle);
+class Render {
+public:
+    static const int width = 1200;
+    static const int height = 1200;
+    static const int depth = 255;
 
-Matrix<double> rotateY(float angle);
+    TGAImage image;
+    float* depthBuffer;
 
-Matrix<double> rotateZ(float angle);
+    Camera* camera;
 
-Matrix<double> translate(dvec3 translation);
+    static Render &getInstance();
 
-Matrix<double> rescale(dvec3 scale);
+    static Matrix<double> rotateX(float angle);
 
-Matrix<double> vectorToMatrix(dvec3 vector);
+    static Matrix<double> rotateY(float angle);
 
-dvec3 matrixToVector(Matrix<double> vector);
+    static Matrix<double> rotateZ(float angle);
 
-Matrix<double> viewport(int x, int y, int w, int h);
+    static Matrix<double> translate(dvec3 translation);
 
-//Line sweep triangle generation algorithm
-void triangleLineSweep(ivec2 p0, ivec2 p1, ivec2 p2, TGAImage &image, TGAColor color);
+    static Matrix<double> rescale(dvec3 scale);
 
-//Barycentric coordinates triangle generation algorithm
-void triangleBarycentric(dvec3 p0, dvec3 p1, dvec3 p2, float *zBuffer, TGAImage &image, TGAColor color);
+    static Matrix<double> vectorToMatrix(dvec3 vector);
 
-void triangleBarycentric(dvec3 p0, dvec3 p1, dvec3 p2, float *zBuffer, TGAImage &image, TGAImage &texture, dvec2 uv0,
-                         dvec2 uv1, dvec2 uv2, float lightIntensity);
+    static dvec3 matrixToVector(Matrix<double> vector);
 
-//Bresenham line algorithm implementation
-//Extra explanation: https://www.youtube.com/watch?v=IDFB5CDpLDE
-void line(dvec3 p0, dvec3 p1, float *zBuffer, TGAImage &image, TGAColor color);
+    Matrix<double> viewport(int x, int y, int w, int h);
 
-dvec3 barycentricCoordinates(dvec3 p0, dvec3 p1, dvec3 p2, dvec3 p);
+    //Triangle rasterization: http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
+    //Line sweep triangle generation algorithm
+    void triangleLineSweep(ivec2 p0, ivec2 p1, ivec2 p2, TGAColor color);
 
-dvec3 barycentricCoordinates(dvec2 p0, dvec2 p1, dvec2 p2, dvec2 p);
+    void triangleBarycentric(dvec3 *points, IShader *shader);
 
-dvec2 getTriangleMinBounds(dvec3 p0, dvec3 p1, dvec3 p2);
+    //Bresenham line algorithm implementation
+    //Extra explanation: https://www.youtube.com/watch?v=IDFB5CDpLDE
+    void line(dvec3 p0, dvec3 p1, TGAColor color);
 
-dvec2 getTriangleMaxBounds(dvec3 p0, dvec3 p1, dvec3 p2);
+    ~Render();
+private:
+    dvec3 barycentricCoordinates(dvec3 p0, dvec3 p1, dvec3 p2, dvec3 p);
+
+    dvec3 barycentricCoordinates(dvec2 p0, dvec2 p1, dvec2 p2, dvec2 p);
+
+    dvec2 getTriangleMinBounds(dvec3 p0, dvec3 p1, dvec3 p2);
+
+    dvec2 getTriangleMaxBounds(dvec3 p0, dvec3 p1, dvec3 p2);
+
+    Render();
+};
 
 #endif //TINYRENDERER_RENDER_H

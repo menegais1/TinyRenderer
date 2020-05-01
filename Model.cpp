@@ -108,56 +108,33 @@ void Model::readFaces(std::ifstream &file) {
     }
 }
 
-void Model::renderWireframe(TGAImage &image, const TGAColor &color, int scaleX, int scaleY) {
-    for (int i = 0; i < faces.size(); i++) {
-        Face f = faces[i];
-        dvec3 v0 = (vertices[f.vert.x] + dvec3(1.0, 1.0, 1.0));
-        dvec3 v1 = (vertices[f.vert.y] + dvec3(1.0, 1.0, 1.0));
-        dvec3 v2 = (vertices[f.vert.z] + dvec3(1.0, 1.0, 1.0));
-//        line(ivec2(v0.x * scaleX, v0.y * scaleY), ivec2(v1.x * scaleX, v1.y * scaleY), image, color);
-//        line(ivec2(v0.x * scaleX, v0.y * scaleY), ivec2(v2.x * scaleX, v2.y * scaleY), image, color);
-//        line(ivec2(v1.x * scaleX, v1.y * scaleY), ivec2(v2.x * scaleX, v2.y * scaleY), image, color);
-    }
-}
-
-void Model::renderModel(TGAImage &image, int scaleX, int scaleY, dvec3 lightDirection) {
-    float *zBuffer = new float[width * height];
-    for (int j = 0; j < width * height; ++j) {
-        //Some strange bug happened
-        zBuffer[j] = -1000000;
-    }
-    c.lookAt(dvec3(0, 0, 3), dvec3(0, 0, 0), dvec3(0, 1, 0));
-    c.projection(-1.0 / (c.cameraPos - c.cameraPointOfInterest).length());
-    c.viewport(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
+void Model::renderModel() {
     TGAImage texture;
     texture.read_tga_file("../african_head_diffuse.tga");
     texture.flip_vertically();
+    ModelShader *shader = new ModelShader(this);
+    dvec3 verts[3];
     for (int i = 0; i < faces.size(); i++) {
         Face f = faces[i];
-        dvec3 v0 = (vertices[f.vert.x]);
-        dvec3 v1 = (vertices[f.vert.y]);
-        dvec3 v2 = (vertices[f.vert.z]);
-        dvec3 normal = (v2 - v0).cross(v1 - v0);
-        normal = normal.unit();
-        float lightIntensity = normal.dot(lightDirection);
-        dvec3 cameraDirection = (v0 - c.cameraPos).unit();
-        float backfaceCulling = normal.dot(cameraDirection);
-        v0 = matrixToVector(c.Viewport * c.Projection * c.View *
-                            vectorToMatrix(v0));
-        v1 = matrixToVector(c.Viewport * c.Projection * c.View *
-                            vectorToMatrix(v1));
-        v2 = matrixToVector(c.Viewport * c.Projection * c.View *
-                            vectorToMatrix(v2));
-        if (backfaceCulling >= 0) {
-            dvec3 uv0 = textureCoordinates[f.texture.x];
-            dvec3 uv1 = textureCoordinates[f.texture.y];
-            dvec3 uv2 = textureCoordinates[f.texture.z];
-            triangleBarycentric(v0,
-                                v1,
-                                v2, zBuffer, image,
-                                texture, dvec2(uv0.x, uv0.y), dvec2(uv1.x, uv1.y), dvec2(uv2.x, uv2.y),
-                                lightIntensity >= 0 ? lightIntensity : 0);
+        for (int j = 0; j < 3; ++j) {
+            verts[j] = shader->vertexShader(i, f.vert[j]);
         }
+
+        Render::getInstance().triangleBarycentric(verts, shader);
     }
+    delete shader;
 }
 
+dvec3 ModelShader::vertexShader(int faceId, int vertexId) {
+    Camera* c = Render::getInstance().camera;
+    return Render::matrixToVector(c->Viewport * c->Projection * c->View * m->vertices[vertexId]);
+}
+
+bool ModelShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
+    color = TGAColor(255, 255, 255, 255);
+    return false;
+}
+
+ModelShader::ModelShader(Model *m) : m(m) {
+
+}

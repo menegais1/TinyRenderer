@@ -7,20 +7,18 @@
 #include <iostream>
 #include <cmath>
 
-const TGAColor blue = TGAColor(0, 0, 255, 255);
-const TGAColor red = TGAColor(255, 0, 0, 255);
-const TGAColor green = TGAColor(0, 255, 0, 255);
-TGAImage image(width, height, TGAImage::RGB);
 
 void loadModelAndRender() {
     Model m;
     m.loadObj("../african_head.obj");
-    m.renderModel(image, halfWidth, halfHeight, dvec3(0, 0, -1).unit());
-    image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
-    image.write_tga_file("output.tga");
+    m.renderModel();
 }
 
 int main(int argc, char **argv) {
+    Camera* camera = Render::getInstance().camera;
+    camera->lookAt(dvec3(0, 0, 3), dvec3(0, 0, 0), dvec3(0, 1, 0));
+    camera->projection(-1.0 / (camera->cameraPos - camera->cameraPointOfInterest).length());
+    camera->viewport(Render::width / 8, Render::width / 8, Render::width * 3 / 4, Render::width * 3 / 4);
     loadModelAndRender();
     return 0;
 }
