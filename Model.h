@@ -20,7 +20,7 @@ typedef struct face {
 } Face;
 
 
-class ModelShader;
+class FlatShader;
 
 class Model {
 public:
@@ -31,9 +31,15 @@ public:
 
     void loadObj(std::string filename);
 
-    void renderWireframe(TGAImage &image, const TGAColor &color, int scaleX, int scaleY);
-
     void renderModel();
+
+    dvec3 vertex(int faceId, int vertexd);
+
+    dvec3 normal(int faceId, int vertexId);
+
+    dvec3 uv(int faceId, int vertexId);
+
+    dvec3 surfaceNormal(int faceId);
 
 private:
     void readVertices(std::ifstream &file);
@@ -47,12 +53,19 @@ private:
 };
 
 
-class ModelShader : public IShader {
+class FlatShader : public IShader {
 public:
 
-    Model *m;
+    Model *_Model;
+    dvec3 _GlobalIluminationColor;
+    dvec3 _PointLightDirection;
+    dvec3 _PointLightColor;
 
-    ModelShader(Model* m);
+    float varyingLightIntensity;
+
+
+    FlatShader(Model *_Model, const dvec3 &globalIluminationColor, const dvec3 &pointLightDirection,
+               const dvec3 &pointLightColor);
 
     dvec3 vertexShader(int faceId, int vertexId) override;
 

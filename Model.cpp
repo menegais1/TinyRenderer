@@ -112,12 +112,12 @@ void Model::renderModel() {
     TGAImage texture;
     texture.read_tga_file("../african_head_diffuse.tga");
     texture.flip_vertically();
-    ModelShader *shader = new ModelShader(this);
+    FlatShader *shader = new FlatShader(this, dvec3(0, 0, 0),
+                                        (dvec3(0, 0, 0) - dvec3(1, 1, 1)).unit(), dvec3(255, 255, 255));
     dvec3 verts[3];
     for (int i = 0; i < faces.size(); i++) {
-        Face f = faces[i];
         for (int j = 0; j < 3; ++j) {
-            verts[j] = shader->vertexShader(i, f.vert[j]);
+            verts[j] = shader->vertexShader(i, j);
         }
 
         Render::getInstance().triangleBarycentric(verts, shader);
@@ -125,16 +125,44 @@ void Model::renderModel() {
     delete shader;
 }
 
-dvec3 ModelShader::vertexShader(int faceId, int vertexId) {
-    Camera* c = Render::getInstance().camera;
-    return Render::matrixToVector(c->Viewport * c->Projection * c->View * m->vertices[vertexId]);
+dvec3 Model::vertex(int faceId, int vertexId) {
+    return vertices[faces[faceId].vert[vertexId]];
 }
 
-bool ModelShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
-    color = TGAColor(255, 255, 255, 255);
+dvec3 Model::normal(int faceId, int vertexId) {
+    return verticesNormals[faces[faceId].vert[vertexId]];
+}
+
+dvec3 Model::uv(int faceId, int vertexId) {
+    return textureCoordinates[faces[faceId].vert[vertexId]];
+}
+
+dvec3 Model::surfaceNormal(int faceId) {
+    Face f = faces[faceId];
+    dvec3 v0 = vertices[f.vert[0]];
+    dvec3 v1 = vertices[f.vert[1]];
+    dvec3 v2 = vertices[f.vert[2]];
+    return ((v2 - v0).cross(v1 - v0)).unit();
+}
+
+dvec3 FlatShader::vertexShader(int faceId, int vertexId) {
+    Camera *c = Render::getInstance().camera;
+
+    dvec3 vertex = _Model->vertex(faceId, vertexId);
+    dvec3 normal = _Model->surfaceNormal(faceId);
+    varyingLightIntensity = std::max(0.0, normal.dot(_PointLightDirection));
+    return Render::matrixToVector(c->Viewport * c->Projection * c->View * vertex);
+}
+
+bool FlatShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
+    dvec3 c = _GlobalIluminationColor * 0.3f + _PointLightColor * varyingLightIntensity;
+    color = TGAColor(std::min(c.x, 255.0), std::min(c.y, 255.0), std::min(c.z, 255.0), 1);
     return false;
 }
 
-ModelShader::ModelShader(Model *m) : m(m) {
+FlatShader::FlatShader(Model *_Model, const dvec3 &globalIluminationColor, const dvec3 &pointLightDirection,
+                       const dvec3 &pointLightColor) : _Model(_Model),
+                                                       _GlobalIluminationColor(globalIluminationColor),
+                                                       _PointLightDirection(pointLightDirection),
+                                                       _PointLightColor(pointLightColor) {}
 
-}
