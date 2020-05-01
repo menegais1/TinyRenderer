@@ -72,4 +72,23 @@ public:
     bool fragmentShader(dvec3 barycentric, TGAColor &color) override;
 };
 
+class GoroudShader : public IShader {
+public:
+
+    Model *_Model;
+    dvec3 _GlobalIluminationColor;
+    dvec3 _PointLightDirection;
+    dvec3 _PointLightColor;
+
+    dvec3 varyingLightIntensity;
+
+
+    GoroudShader(Model *_Model, const dvec3 &globalIluminationColor, const dvec3 &pointLightDirection,
+                 const dvec3 &pointLightColor);
+
+    dvec3 vertexShader(int faceId, int vertexId) override;
+
+    bool fragmentShader(dvec3 barycentric, TGAColor &color) override;
+};
+
 #endif //TINYRENDERER_MODEL_H

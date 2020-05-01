@@ -112,8 +112,8 @@ void Model::renderModel() {
     TGAImage texture;
     texture.read_tga_file("../african_head_diffuse.tga");
     texture.flip_vertically();
-    FlatShader *shader = new FlatShader(this, dvec3(0, 0, 0),
-                                        (dvec3(0, 0, 0) - dvec3(1, 1, 1)).unit(), dvec3(255, 255, 255));
+    GoroudShader *shader = new GoroudShader(this, dvec3(0, 0, 0),
+                                            (dvec3(0, 0, 0) - dvec3(0, 0, 1)).unit(), dvec3(255, 255, 255));
     dvec3 verts[3];
     for (int i = 0; i < faces.size(); i++) {
         for (int j = 0; j < 3; ++j) {
@@ -130,7 +130,8 @@ dvec3 Model::vertex(int faceId, int vertexId) {
 }
 
 dvec3 Model::normal(int faceId, int vertexId) {
-    return verticesNormals[faces[faceId].vert[vertexId]];
+    //The normals seem to be flipped
+    return -verticesNormals[faces[faceId].vert[vertexId]];
 }
 
 dvec3 Model::uv(int faceId, int vertexId) {
@@ -165,4 +166,27 @@ FlatShader::FlatShader(Model *_Model, const dvec3 &globalIluminationColor, const
                                                        _GlobalIluminationColor(globalIluminationColor),
                                                        _PointLightDirection(pointLightDirection),
                                                        _PointLightColor(pointLightColor) {}
+
+
+dvec3 GoroudShader::vertexShader(int faceId, int vertexId) {
+    Camera *c = Render::getInstance().camera;
+
+    dvec3 vertex = _Model->vertex(faceId, vertexId);
+    dvec3 normal = _Model->normal(faceId, vertexId);
+    varyingLightIntensity[vertexId] = std::max(0.0, normal.dot(_PointLightDirection));
+    return Render::matrixToVector(c->Viewport * c->Projection * c->View * vertex);
+}
+
+bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
+    float lightIntensity = barycentric.dot(varyingLightIntensity);
+    dvec3 c = _GlobalIluminationColor * 0.3f + _PointLightColor * lightIntensity;
+    color = TGAColor(std::min(c.x, 255.0), std::min(c.y, 255.0), std::min(c.z, 255.0), 1);
+    return false;
+}
+
+GoroudShader::GoroudShader(Model *_Model, const dvec3 &globalIluminationColor, const dvec3 &pointLightDirection,
+                           const dvec3 &pointLightColor) : _Model(_Model),
+                                                           _GlobalIluminationColor(globalIluminationColor),
+                                                           _PointLightDirection(pointLightDirection),
+                                                           _PointLightColor(pointLightColor) {}
 
