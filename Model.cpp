@@ -112,7 +112,7 @@ void Model::renderModel() {
     TGAImage texture;
     texture.read_tga_file("../african_head_diffuse.tga");
     texture.flip_vertically();
-    GoroudShader *shader = new GoroudShader(this, (dvec3(0, 0, 0) - dvec3(0, 0, 1)).unit(), dvec3(255, 255, 255));
+    GoroudShader *shader = new GoroudShader(this, (dvec3(0, 0, 1) - (dvec3(0, 0, 0))).unit(), dvec3(255, 255, 255));
     shader->_DiffuseTexture = texture;
     dvec3 verts[3];
     for (int i = 0; i < faces.size(); i++) {
@@ -130,8 +130,7 @@ dvec3 Model::vertex(int faceId, int vertexId) {
 }
 
 dvec3 Model::normal(int faceId, int vertexId) {
-    //The normals seem to be flipped
-    return -verticesNormals[faces[faceId].normal[vertexId]];
+    return verticesNormals[faces[faceId].normal[vertexId]];
 }
 
 dvec3 Model::uv(int faceId, int vertexId) {
@@ -143,7 +142,7 @@ dvec3 Model::surfaceNormal(int faceId) {
     dvec3 v0 = vertices[f.vert[0]];
     dvec3 v1 = vertices[f.vert[1]];
     dvec3 v2 = vertices[f.vert[2]];
-    return ((v2 - v0).cross(v1 - v0)).unit();
+    return ((v1 - v0).cross(v2 - v0)).unit();
 }
 
 dvec3 FlatShader::vertexShader(int faceId, int vertexId) {
@@ -190,8 +189,6 @@ bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
     TGAColor texSample = _DiffuseTexture.get(pixel.x * _DiffuseTexture.get_width(),
                                              pixel.y * _DiffuseTexture.get_height());
     dvec3 texColor = dvec3(texSample.r, texSample.g, texSample.b);
-    std::cout << pixel.x << " " << pixel.y << std::endl;
-    texColor.print();
     dvec3 c = texColor * lightIntensity;
     color = TGAColor(std::min(c.x, 255.0), std::min(c.y, 255.0), std::min(c.z, 255.0), 1);
     return false;

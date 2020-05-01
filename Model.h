@@ -82,6 +82,7 @@ public:
 
     dvec3 varyingLightIntensity;
     dvec3 varyingUv[3];
+    dvec3 varyingNormal[3];
 
 
     GoroudShader(Model *_Model, const dvec3 &pointLightDirection,
