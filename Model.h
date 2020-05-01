@@ -79,8 +79,10 @@ public:
     dvec3 _GlobalIluminationColor;
     dvec3 _PointLightDirection;
     dvec3 _PointLightColor;
+    TGAImage _DiffuseTexture;
 
     dvec3 varyingLightIntensity;
+    dvec3 varyingUv[3];
 
 
     GoroudShader(Model *_Model, const dvec3 &globalIluminationColor, const dvec3 &pointLightDirection,

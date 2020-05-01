@@ -112,8 +112,9 @@ void Model::renderModel() {
     TGAImage texture;
     texture.read_tga_file("../african_head_diffuse.tga");
     texture.flip_vertically();
-    GoroudShader *shader = new GoroudShader(this, dvec3(0, 0, 0),
+    GoroudShader *shader = new GoroudShader(this, dvec3(255, 255, 255),
                                             (dvec3(0, 0, 0) - dvec3(0, 0, 1)).unit(), dvec3(255, 255, 255));
+    shader->_DiffuseTexture = texture;
     dvec3 verts[3];
     for (int i = 0; i < faces.size(); i++) {
         for (int j = 0; j < 3; ++j) {
@@ -131,11 +132,11 @@ dvec3 Model::vertex(int faceId, int vertexId) {
 
 dvec3 Model::normal(int faceId, int vertexId) {
     //The normals seem to be flipped
-    return -verticesNormals[faces[faceId].vert[vertexId]];
+    return -verticesNormals[faces[faceId].normal[vertexId]];
 }
 
 dvec3 Model::uv(int faceId, int vertexId) {
-    return textureCoordinates[faces[faceId].vert[vertexId]];
+    return textureCoordinates[faces[faceId].texture[vertexId]];
 }
 
 dvec3 Model::surfaceNormal(int faceId) {
@@ -173,13 +174,26 @@ dvec3 GoroudShader::vertexShader(int faceId, int vertexId) {
 
     dvec3 vertex = _Model->vertex(faceId, vertexId);
     dvec3 normal = _Model->normal(faceId, vertexId);
+    varyingUv[vertexId] = _Model->uv(faceId, vertexId);
     varyingLightIntensity[vertexId] = std::max(0.0, normal.dot(_PointLightDirection));
     return Render::matrixToVector(c->Viewport * c->Projection * c->View * vertex);
 }
 
 bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
     float lightIntensity = barycentric.dot(varyingLightIntensity);
-    dvec3 c = _GlobalIluminationColor * 0.3f + _PointLightColor * lightIntensity;
+    dvec2 pixel;
+    for (int i = 0; i < 3; ++i) {
+        pixel.x =
+                varyingUv[0].x * barycentric[0] + varyingUv[1].x * barycentric[1] + varyingUv[2].x * barycentric[2];
+        pixel.y =
+                varyingUv[0].y * barycentric[0] + varyingUv[1].y * barycentric[1] + varyingUv[2].y * barycentric[2];
+    }
+    TGAColor texSample = _DiffuseTexture.get(pixel.x * _DiffuseTexture.get_width(),
+                                             pixel.y * _DiffuseTexture.get_height());
+    dvec3 texColor = dvec3(texSample.r, texSample.g, texSample.b);
+    std::cout << pixel.x <<  " " << pixel.y << std::endl;
+    texColor.print();
+    dvec3 c =  texColor * lightIntensity;
     color = TGAColor(std::min(c.x, 255.0), std::min(c.y, 255.0), std::min(c.z, 255.0), 1);
     return false;
 }
