@@ -112,8 +112,7 @@ void Model::renderModel() {
     TGAImage texture;
     texture.read_tga_file("../african_head_diffuse.tga");
     texture.flip_vertically();
-    GoroudShader *shader = new GoroudShader(this, dvec3(255, 255, 255),
-                                            (dvec3(0, 0, 0) - dvec3(0, 0, 1)).unit(), dvec3(255, 255, 255));
+    GoroudShader *shader = new GoroudShader(this, (dvec3(0, 0, 0) - dvec3(0, 0, 1)).unit(), dvec3(255, 255, 255));
     shader->_DiffuseTexture = texture;
     dvec3 verts[3];
     for (int i = 0; i < faces.size(); i++) {
@@ -191,16 +190,15 @@ bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
     TGAColor texSample = _DiffuseTexture.get(pixel.x * _DiffuseTexture.get_width(),
                                              pixel.y * _DiffuseTexture.get_height());
     dvec3 texColor = dvec3(texSample.r, texSample.g, texSample.b);
-    std::cout << pixel.x <<  " " << pixel.y << std::endl;
+    std::cout << pixel.x << " " << pixel.y << std::endl;
     texColor.print();
-    dvec3 c =  texColor * lightIntensity;
+    dvec3 c = texColor * lightIntensity;
     color = TGAColor(std::min(c.x, 255.0), std::min(c.y, 255.0), std::min(c.z, 255.0), 1);
     return false;
 }
 
-GoroudShader::GoroudShader(Model *_Model, const dvec3 &globalIluminationColor, const dvec3 &pointLightDirection,
+GoroudShader::GoroudShader(Model *_Model, const dvec3 &pointLightDirection,
                            const dvec3 &pointLightColor) : _Model(_Model),
-                                                           _GlobalIluminationColor(globalIluminationColor),
                                                            _PointLightDirection(pointLightDirection),
                                                            _PointLightColor(pointLightColor) {}
 

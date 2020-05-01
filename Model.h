@@ -76,7 +76,6 @@ class GoroudShader : public IShader {
 public:
 
     Model *_Model;
-    dvec3 _GlobalIluminationColor;
     dvec3 _PointLightDirection;
     dvec3 _PointLightColor;
     TGAImage _DiffuseTexture;
@@ -85,7 +84,7 @@ public:
     dvec3 varyingUv[3];
 
 
-    GoroudShader(Model *_Model, const dvec3 &globalIluminationColor, const dvec3 &pointLightDirection,
+    GoroudShader(Model *_Model, const dvec3 &pointLightDirection,
                  const dvec3 &pointLightColor);
 
     dvec3 vertexShader(int faceId, int vertexId) override;
