@@ -11,6 +11,7 @@
 void loadModelAndRender() {
     Model m;
     m.loadObj("../african_head.obj");
+    m.loadDiffuse("../african_head_diffuse.tga");
     m.renderModel();
 }
 

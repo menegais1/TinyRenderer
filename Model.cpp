@@ -19,6 +19,11 @@ void Model::loadObj(std::string filename) {
     readFaces(file);
 }
 
+void Model::loadDiffuse(std::string filename) {
+    diffuseTexture.read_tga_file(filename.c_str());
+    diffuseTexture.flip_vertically();
+}
+
 void Model::readVertices(std::ifstream &file) {
     std::string x, y, z;
     std::string s;
@@ -109,11 +114,7 @@ void Model::readFaces(std::ifstream &file) {
 }
 
 void Model::renderModel() {
-    TGAImage texture;
-    texture.read_tga_file("../african_head_diffuse.tga");
-    texture.flip_vertically();
-    GoroudShader *shader = new GoroudShader(this, (dvec3(0, 0, 1) - (dvec3(0, 0, 0))).unit(), dvec3(255, 255, 255));
-    shader->_DiffuseTexture = texture;
+    GoroudShader *shader = new GoroudShader(this, (dvec3(0, 0, 1) - (dvec3(0, 0, 0))).unit());
     dvec3 verts[3];
     for (int i = 0; i < faces.size(); i++) {
         for (int j = 0; j < 3; ++j) {
@@ -145,6 +146,19 @@ dvec3 Model::surfaceNormal(int faceId) {
     return ((v1 - v0).cross(v2 - v0)).unit();
 }
 
+dvec3 Model::interpolate(dvec3 barycentric, dvec3 v0, dvec3 v1, dvec3 v2) {
+    dvec3 result;
+    result.x = v0.x * barycentric[0] + v1.x * barycentric[1] + v2.x * barycentric[2];
+    result.y = v0.y * barycentric[0] + v1.y * barycentric[1] + v2.y * barycentric[2];
+    result.z = v0.z * barycentric[0] + v1.z * barycentric[1] + v2.z * barycentric[2];
+    return result;
+}
+
+dvec3 Model::sampleDiffuse(dvec2 pixel) {
+    TGAColor c = diffuseTexture.get(pixel.x * diffuseTexture.get_width(), pixel.y * diffuseTexture.get_height());
+    return dvec3(c.r, c.g, c.b);
+}
+
 dvec3 FlatShader::vertexShader(int faceId, int vertexId) {
     Camera *c = Render::getInstance().camera;
 
@@ -173,29 +187,20 @@ dvec3 GoroudShader::vertexShader(int faceId, int vertexId) {
     dvec3 vertex = _Model->vertex(faceId, vertexId);
     dvec3 normal = _Model->normal(faceId, vertexId);
     varyingUv[vertexId] = _Model->uv(faceId, vertexId);
-    varyingLightIntensity[vertexId] = std::max(0.0, normal.dot(_PointLightDirection));
+    varyingLightIntensity[vertexId] = std::max(0.0, normal.dot(_DirectionalLightDirection));
     return Render::matrixToVector(c->Viewport * c->Projection * c->View * vertex);
 }
 
 bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
     float lightIntensity = barycentric.dot(varyingLightIntensity);
-    dvec2 pixel;
-    for (int i = 0; i < 3; ++i) {
-        pixel.x =
-                varyingUv[0].x * barycentric[0] + varyingUv[1].x * barycentric[1] + varyingUv[2].x * barycentric[2];
-        pixel.y =
-                varyingUv[0].y * barycentric[0] + varyingUv[1].y * barycentric[1] + varyingUv[2].y * barycentric[2];
-    }
-    TGAColor texSample = _DiffuseTexture.get(pixel.x * _DiffuseTexture.get_width(),
-                                             pixel.y * _DiffuseTexture.get_height());
-    dvec3 texColor = dvec3(texSample.r, texSample.g, texSample.b);
-    dvec3 c = texColor * lightIntensity;
-    color = TGAColor(std::min(c.x, 255.0), std::min(c.y, 255.0), std::min(c.z, 255.0), 1);
+    dvec3 pixel = _Model->interpolate(barycentric, varyingUv[0], varyingUv[1], varyingUv[2]);
+    dvec3 texColor = _Model->sampleDiffuse(dvec2(pixel.x, pixel.y));
+    dvec3 finalLight = texColor * lightIntensity;
+    color = TGAColor(std::min(finalLight.x, 255.0), std::min(finalLight.y, 255.0), std::min(finalLight.z, 255.0), 1);
     return false;
 }
 
-GoroudShader::GoroudShader(Model *_Model, const dvec3 &pointLightDirection,
-                           const dvec3 &pointLightColor) : _Model(_Model),
-                                                           _PointLightDirection(pointLightDirection),
-                                                           _PointLightColor(pointLightColor) {}
+GoroudShader::GoroudShader(Model *_Model, const dvec3 &_DirectionalLightDirection) : _Model(_Model),
+                                                                                     _DirectionalLightDirection(
+                                                                                             _DirectionalLightDirection) {}
 

@@ -28,8 +28,12 @@ public:
     std::vector<dvec3> vertices;
     std::vector<dvec3> textureCoordinates;
     std::vector<dvec3> verticesNormals;
+    TGAImage diffuseTexture;
+    TGAImage normalTexture;
 
     void loadObj(std::string filename);
+
+    void loadDiffuse(std::string filename);
 
     void renderModel();
 
@@ -40,6 +44,10 @@ public:
     dvec3 uv(int faceId, int vertexId);
 
     dvec3 surfaceNormal(int faceId);
+
+    dvec3 interpolate(dvec3 barycentric, dvec3 v0, dvec3 v1, dvec3 v2);
+
+    dvec3 sampleDiffuse(dvec2 uv);
 
 private:
     void readVertices(std::ifstream &file);
@@ -76,17 +84,14 @@ class GoroudShader : public IShader {
 public:
 
     Model *_Model;
-    dvec3 _PointLightDirection;
-    dvec3 _PointLightColor;
-    TGAImage _DiffuseTexture;
+    dvec3 _DirectionalLightDirection;
 
     dvec3 varyingLightIntensity;
     dvec3 varyingUv[3];
     dvec3 varyingNormal[3];
 
 
-    GoroudShader(Model *_Model, const dvec3 &pointLightDirection,
-                 const dvec3 &pointLightColor);
+    GoroudShader(Model *_Model, const dvec3 &_DirectionalLightDirection);
 
     dvec3 vertexShader(int faceId, int vertexId) override;
 
