@@ -61,11 +61,12 @@ Matrix<T>::Matrix(int rows, int cols) : rows(rows), cols(cols) {
 template<class T>
 std::vector<T> &Matrix<T>::operator[](int idx) {
     if (idx >= 0 && idx < rows) return m[idx];
+    return m[0];
 }
 
 template<class T>
 Matrix<T> Matrix<T>::operator*(Matrix<T> Mat) {
-    if (Mat.rows != this->cols){
+    if (Mat.rows != this->cols) {
         std::cerr << "INVALID MATRIX MUL" << std::endl;
         return Mat;
     }
@@ -107,35 +108,35 @@ Matrix<T> Matrix<T>::invert() {
             result[i][j] = m[i][j];
     for (int i = 0; i < rows; i++)
         result[i][i + cols] = 1;
-    // first pass
-    for (int i = 0; i < rows - 1; i++) {
-        // normalize the first row
-        for (int j = result.cols - 1; j >= 0; j--)
-            result[i][j] /= result[i][i];
-        for (int k = i + 1; k < rows; k++) {
-            float coeff = result[k][i];
-            for (int j = 0; j < result.cols; j++) {
-                result[k][j] -= result[i][j] * coeff;
+
+    for (int i = 0; i < rows; i++) {
+        T pivo;
+        for (int j = 0; j < cols * 2; ++j) {
+            if (result[i][j] != 0) {
+                pivo = result[i][j];
+                break;
+            }
+        }
+
+        for (int j = 0; j < cols * 2; ++j) {
+            result[i][j] = result[i][j] / pivo;
+        }
+
+        for (int k = 0; k < rows; ++k) {
+            T mult = result[k][i];
+            if (k == i) continue;
+            for (int j = 0; j < cols * 2; ++j) {
+                result[k][j] = result[k][j] - result[i][j] * mult;
             }
         }
     }
-    // normalize the last row
-    for (int j = result.cols - 1; j >= rows - 1; j--)
-        result[rows - 1][j] /= result[rows - 1][rows - 1];
-    // second pass
-    for (int i = rows - 1; i > 0; i--) {
-        for (int k = i - 1; k >= 0; k--) {
-            float coeff = result[k][i];
-            for (int j = 0; j < result.cols; j++) {
-                result[k][j] -= result[i][j] * coeff;
-            }
-        }
-    }
-    // cut the identity matrix back
     Matrix truncate(rows, cols);
-    for (int i = 0; i < rows; i++)
-        for (int j = 0; j < cols; j++)
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
             truncate[i][j] = result[i][j + cols];
+        }
+    }
+
     return truncate;
 }
 
@@ -192,7 +193,7 @@ void Matrix<T>::setRow(const Vector3<T> v, int row) {
     if (cols != 3 || row >= this->rows || row < 0) {
         std::cerr << "INVALID MATRIX SET ROW" << std::endl;
     }
-    this->m[row] = {v[0], v[1], v[2]};
+    this->m[row] = {v.x, v.y, v.z};
 }
 
 template<class T>
@@ -200,7 +201,7 @@ void Matrix<T>::setRow(const Vector4<T> v, int row) {
     if (cols != 4 || row >= this->rows || row < 0) {
         std::cerr << "INVALID MATRIX SET ROW" << std::endl;
     }
-    this->m[row] = {v[0], v[1], v[2], v[3]};
+    this->m[row] = {v.x, v.y, v.z, v.w};
 }
 
 #endif //TINYRENDERER_MATRIX_H

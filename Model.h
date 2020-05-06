@@ -35,6 +35,8 @@ public:
 
     void loadDiffuse(std::string filename);
 
+    void loadNormal(std::string filename);
+
     void renderModel();
 
     dvec3 vertex(int faceId, int vertexd);
@@ -48,6 +50,8 @@ public:
     dvec3 interpolate(dvec3 barycentric, dvec3 v0, dvec3 v1, dvec3 v2);
 
     dvec3 sampleDiffuse(dvec2 uv);
+
+    dvec3 sampleNormal(dvec2 uv);
 
 private:
     void readVertices(std::ifstream &file);
@@ -89,6 +93,7 @@ public:
     dvec3 varyingLightIntensity;
     dvec3 varyingUv[3];
     dvec3 varyingNormal[3];
+    dvec3 varyingVertex[3];
 
 
     GoroudShader(Model *_Model, const dvec3 &_DirectionalLightDirection);
@@ -96,6 +101,8 @@ public:
     dvec3 vertexShader(int faceId, int vertexId) override;
 
     bool fragmentShader(dvec3 barycentric, TGAColor &color) override;
+
+    dvec3 CalculateTBN(const dvec3 &uv, const dvec3 &normal) const;
 };
 
 #endif //TINYRENDERER_MODEL_H

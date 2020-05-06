@@ -24,6 +24,11 @@ void Model::loadDiffuse(std::string filename) {
     diffuseTexture.flip_vertically();
 }
 
+void Model::loadNormal(std::string filename) {
+    normalTexture.read_tga_file(filename.c_str());
+    normalTexture.flip_vertically();
+}
+
 void Model::readVertices(std::ifstream &file) {
     std::string x, y, z;
     std::string s;
@@ -114,9 +119,9 @@ void Model::readFaces(std::ifstream &file) {
 }
 
 void Model::renderModel() {
-    FlatShader *shader = new FlatShader(this, dvec3(255, 255, 255), (dvec3(0, 0, 1) - (dvec3(0, 0, 0))).unit(),
-                                        dvec3(255, 255, 255));
-    //GoroudShader *shader = new GoroudShader(this, (dvec3(0, 0, 1) - (dvec3(0, 0, 0))).unit());
+    //   FlatShader *shader = new FlatShader(this, dvec3(255, 255, 255), (dvec3(0, 0, 1) - (dvec3(0, 0, 0))).unit(),
+    //                                     dvec3(255, 255, 255));
+    GoroudShader *shader = new GoroudShader(this, (dvec3(1, 1, 1) - (dvec3(0, 0, 0))).unit());
     dvec3 verts[3];
     for (int i = 0; i < faces.size(); i++) {
         for (int j = 0; j < 3; ++j) {
@@ -156,8 +161,14 @@ dvec3 Model::interpolate(dvec3 barycentric, dvec3 v0, dvec3 v1, dvec3 v2) {
     return result;
 }
 
-dvec3 Model::sampleDiffuse(dvec2 pixel) {
-    TGAColor c = diffuseTexture.get(pixel.x * diffuseTexture.get_width(), pixel.y * diffuseTexture.get_height());
+dvec3 Model::sampleDiffuse(dvec2 uv) {
+    TGAColor c = diffuseTexture.get(uv.x * diffuseTexture.get_width(), uv.y * diffuseTexture.get_height());
+    return dvec3(c.r, c.g, c.b);
+}
+
+
+dvec3 Model::sampleNormal(dvec2 uv) {
+    TGAColor c = normalTexture.get(uv.x * normalTexture.get_width(), uv.y * normalTexture.get_height());
     return dvec3(c.r, c.g, c.b);
 }
 
@@ -189,17 +200,57 @@ dvec3 GoroudShader::vertexShader(int faceId, int vertexId) {
     dvec3 vertex = _Model->vertex(faceId, vertexId);
     dvec3 normal = _Model->normal(faceId, vertexId);
     varyingUv[vertexId] = _Model->uv(faceId, vertexId);
+    varyingVertex[vertexId] = _Model->vertex(faceId, vertexId);
+    varyingNormal[vertexId] = _Model->normal(faceId, vertexId);
     varyingLightIntensity[vertexId] = std::max(0.0, normal.dot(_DirectionalLightDirection));
     return Render::ClipSpaceToNDC(c->Viewport * c->Projection * c->View * vertex.toVector4(1));
 }
 
 bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
     float lightIntensity = barycentric.dot(varyingLightIntensity);
-    dvec3 pixel = _Model->interpolate(barycentric, varyingUv[0], varyingUv[1], varyingUv[2]);
-    dvec3 texColor = _Model->sampleDiffuse(dvec2(pixel.x, pixel.y));
-    dvec3 finalLight = texColor * lightIntensity;
+
+    dvec3 uv = _Model->interpolate(barycentric, varyingUv[0], varyingUv[1], varyingUv[2]);
+    dvec3 normal = _Model->interpolate(barycentric, varyingNormal[0], varyingNormal[1], varyingNormal[2]).unit();
+
+    CalculateTBN(uv, normal);
+
+    dvec3 texColor = _Model->sampleDiffuse(dvec2(uv.x, uv.y));
+    dvec3 finalLight = texColor * std::max(0.0, normal.dot(_DirectionalLightDirection));
     color = TGAColor(std::min(finalLight.x, 255.0), std::min(finalLight.y, 255.0), std::min(finalLight.z, 255.0), 1);
+
     return false;
+}
+
+dvec3 GoroudShader::CalculateTBN(const dvec3 &uv, const dvec3 &normal) const {
+    Matrix<double> A(3, 3);
+    dvec3 deltaV1 = (varyingVertex[1] - varyingVertex[0]);
+    dvec3 deltaV2 = (varyingVertex[2] - varyingVertex[0]);
+    dvec3 cross = deltaV1.cross(deltaV2).unit();
+    A.setRow(deltaV1, 0);
+    A.setRow(deltaV2, 1);
+    A.setRow(normal, 2);
+    auto AI = A.invert();
+
+    dvec3 deltaU = dvec3(varyingUv[1].x - varyingUv[0].x, varyingUv[2].x - varyingUv[0].x, 0);
+    dvec3 deltaV = dvec3(varyingUv[1].y - varyingUv[0].y, varyingUv[2].y - varyingUv[0].y, 0);
+
+    auto Tm = AI * deltaU;
+    auto Bm = AI * deltaV;
+    dvec3 T = dvec3(Tm[0][0], Tm[1][0], Tm[2][0]).unit();
+    dvec3 B = dvec3(Bm[0][0], Bm[1][0], Bm[2][0]).unit();
+
+    A.setCol(T, 0);
+    A.setCol(B, 1);
+    A.setCol(normal, 2);
+
+    dvec3 tmp = _Model->sampleNormal(dvec2(uv.x, uv.y));
+    dvec3 disturbedNormal;
+    for (int i = 0; i < 3; i++)
+        disturbedNormal[i] = (float) tmp[i] / 255.f * 2.f - 1.f;
+
+    auto RN = A * disturbedNormal;
+    dvec3 resultNormal = dvec3(RN[0][0], RN[1][0], RN[2][0]).unit();
+    return resultNormal;
 }
 
 GoroudShader::GoroudShader(Model *_Model, const dvec3 &_DirectionalLightDirection) : _Model(_Model),
