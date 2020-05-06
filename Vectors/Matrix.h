@@ -9,9 +9,13 @@
 #include <vector>
 #include <iostream>
 #include "Vector3.h"
+#include "Vector4.h"
 
 template<class t>
-class Vector3;
+struct Vector3;
+
+template<class t>
+struct Vector4;
 
 template<class T>
 class Matrix {
@@ -29,9 +33,15 @@ public:
 
     Matrix<T> operator*(Vector3<T> v);
 
-    static Matrix<T> vectorToMatrix(Vector3<T> vector);
+    Matrix<T> operator*(Vector4<T> v);
 
-    static Vector3<T> matrixToVector(Matrix<T> M);
+    void setCol(const Vector3<T> v, int col);
+
+    void setCol(const Vector4<T> v, int col);
+
+    void setRow(const Vector3<T> v, int row);
+
+    void setRow(const Vector4<T> v, int row);
 
     static Matrix<T> identity(int size);
 
@@ -55,7 +65,10 @@ std::vector<T> &Matrix<T>::operator[](int idx) {
 
 template<class T>
 Matrix<T> Matrix<T>::operator*(Matrix<T> Mat) {
-    if (Mat.rows != this->cols) return Mat;
+    if (Mat.rows != this->cols){
+        std::cerr << "INVALID MATRIX MUL" << std::endl;
+        return Mat;
+    }
     Matrix<T> Result(rows, Mat.cols);
 
     for (int y = 0; y < rows; ++y) {
@@ -128,24 +141,17 @@ Matrix<T> Matrix<T>::invert() {
 
 template<class T>
 Matrix<T> Matrix<T>::operator*(Vector3<T> v) {
-    Matrix<T> M = vectorToMatrix(v);
-    return *this * M;
+    Matrix<T> V = v.toMatrix();
+    return *this * V;
 }
 
-template<class T>
-Matrix<T> Matrix<T>::vectorToMatrix(Vector3<T> vector) {
-    Matrix<T> V(4, 1);
-    V[0] = {vector.x};
-    V[1] = {vector.y};
-    V[2] = {vector.z};
-    V[3] = {1};
-    return V;
-}
 
 template<class T>
-Vector3<T> Matrix<T>::matrixToVector(Matrix<T> M) {
-    return Vector3<T>(M[0][0] / M[3][0], M[1][0] / M[3][0], M[2][0] / M[3][0]);
+Matrix<T> Matrix<T>::operator*(Vector4<T> v) {
+    Matrix<T> V = v.toMatrix();
+    return *this * V;
 }
+
 
 template<class T>
 Matrix<T> Matrix<T>::identity(int size) {
@@ -158,6 +164,43 @@ Matrix<T> Matrix<T>::identity(int size) {
         }
     }
     return M;
+}
+
+template<class T>
+void Matrix<T>::setCol(const Vector3<T> v, int col) {
+    if (rows != 3 || col >= this->cols || col < 0) {
+        std::cerr << "INVALID MATRIX SET COL" << std::endl;
+    }
+    this->m[0][col] = v.x;
+    this->m[1][col] = v.y;
+    this->m[2][col] = v.z;
+}
+
+template<class T>
+void Matrix<T>::setCol(const Vector4<T> v, int col) {
+    if (rows != 4 || col >= this->cols || col < 0) {
+        std::cerr << "INVALID MATRIX SET COL" << std::endl;
+    }
+    this->m[0][col] = v.x;
+    this->m[1][col] = v.y;
+    this->m[2][col] = v.z;
+    this->m[3][col] = v.w;
+}
+
+template<class T>
+void Matrix<T>::setRow(const Vector3<T> v, int row) {
+    if (cols != 3 || row >= this->rows || row < 0) {
+        std::cerr << "INVALID MATRIX SET ROW" << std::endl;
+    }
+    this->m[row] = {v[0], v[1], v[2]};
+}
+
+template<class T>
+void Matrix<T>::setRow(const Vector4<T> v, int row) {
+    if (cols != 4 || row >= this->rows || row < 0) {
+        std::cerr << "INVALID MATRIX SET ROW" << std::endl;
+    }
+    this->m[row] = {v[0], v[1], v[2], v[3]};
 }
 
 #endif //TINYRENDERER_MATRIX_H

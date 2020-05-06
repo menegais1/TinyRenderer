@@ -114,7 +114,9 @@ void Model::readFaces(std::ifstream &file) {
 }
 
 void Model::renderModel() {
-    GoroudShader *shader = new GoroudShader(this, (dvec3(0, 0, 1) - (dvec3(0, 0, 0))).unit());
+    FlatShader *shader = new FlatShader(this, dvec3(255, 255, 255), (dvec3(0, 0, 1) - (dvec3(0, 0, 0))).unit(),
+                                        dvec3(255, 255, 255));
+    //GoroudShader *shader = new GoroudShader(this, (dvec3(0, 0, 1) - (dvec3(0, 0, 0))).unit());
     dvec3 verts[3];
     for (int i = 0; i < faces.size(); i++) {
         for (int j = 0; j < 3; ++j) {
@@ -165,7 +167,7 @@ dvec3 FlatShader::vertexShader(int faceId, int vertexId) {
     dvec3 vertex = _Model->vertex(faceId, vertexId);
     dvec3 normal = _Model->surfaceNormal(faceId);
     varyingLightIntensity = std::max(0.0, normal.dot(_PointLightDirection));
-    return Render::matrixToVector(c->Viewport * c->Projection * c->View * vertex);
+    return Render::ClipSpaceToNDC(c->Viewport * c->Projection * c->View * vertex.toVector4(1));
 }
 
 bool FlatShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
@@ -188,7 +190,7 @@ dvec3 GoroudShader::vertexShader(int faceId, int vertexId) {
     dvec3 normal = _Model->normal(faceId, vertexId);
     varyingUv[vertexId] = _Model->uv(faceId, vertexId);
     varyingLightIntensity[vertexId] = std::max(0.0, normal.dot(_DirectionalLightDirection));
-    return Render::matrixToVector(c->Viewport * c->Projection * c->View * vertex);
+    return Render::ClipSpaceToNDC(c->Viewport * c->Projection * c->View * vertex.toVector4(1));
 }
 
 bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {

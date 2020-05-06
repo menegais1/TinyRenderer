@@ -8,6 +8,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <iostream>
+#include "Matrix.h"
 
 template<class t>
 struct Vector4 {
@@ -47,6 +48,8 @@ public:
     t length();
 
     Vector4<t> unit();
+
+    Matrix<t> toMatrix() const;
 
 };
 
@@ -155,6 +158,13 @@ bool Vector4<t>::operator==(const Vector4 &rhs) const {
 template<class t>
 bool Vector4<t>::operator!=(const Vector4 &rhs) const {
     return !(rhs == *this);
+}
+
+template<class t>
+Matrix<t> Vector4<t>::toMatrix() const {
+    Matrix<t> M(4, 1);
+    M.setCol(*this, 0);
+    return M;
 }
 
 

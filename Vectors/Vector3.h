@@ -6,9 +6,13 @@
 #define TINYRENDERER_VECTOR3_H
 
 #include "Vector4.h"
+#include "Matrix.h"
 #include <cmath>
 #include <stdexcept>
 #include <iostream>
+
+template<class t>
+class Matrix;
 
 template<class t>
 struct Vector3 {
@@ -44,6 +48,8 @@ public:
     bool operator!=(const Vector3 &rhs) const;
 
     Vector4<t> toVector4(t w) const;
+
+    Matrix<t> toMatrix() const;
 
     void print();
 
@@ -180,6 +186,13 @@ bool Vector3<t>::operator!=(const Vector3 &rhs) const {
 template<class t>
 Vector4<t> Vector3<t>::toVector4(t w) const {
     return Vector4<t>(x, y, z, w);
+}
+
+template<class t>
+Matrix<t> Vector3<t>::toMatrix() const {
+    Matrix<t> M(3, 1);
+    M.setCol(*this, 0);
+    return M;
 }
 
 typedef Vector3<int> ivec3;

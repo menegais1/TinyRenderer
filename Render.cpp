@@ -102,7 +102,7 @@ Matrix<double> Render::vectorToMatrix(dvec3 vector) {
     return V;
 }
 
-dvec3 Render::matrixToVector(Matrix<double> M) {
+dvec3 Render::ClipSpaceToNDC(Matrix<double> M) {
     if (M[3][0] == 0) return dvec3(0, 0, 0);
     return dvec3(M[0][0] / M[3][0], M[1][0] / M[3][0], M[2][0] / M[3][0]);
 }

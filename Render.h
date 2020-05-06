@@ -39,7 +39,7 @@ public:
 
     static Matrix<double> vectorToMatrix(dvec3 vector);
 
-    static dvec3 matrixToVector(Matrix<double> vector);
+    static dvec3 ClipSpaceToNDC(Matrix<double> M);
 
     Matrix<double> viewport(int x, int y, int w, int h);
 
