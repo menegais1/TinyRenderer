@@ -102,7 +102,7 @@ public:
 
     bool fragmentShader(dvec3 barycentric, TGAColor &color) override;
 
-    dvec3 CalculateTBN(const dvec3 &uv, const dvec3 &normal) const;
+    Matrix<double> CalculateTBN(const dvec3 &uv, const dvec3 &normal) const;
 };
 
 #endif //TINYRENDERER_MODEL_H

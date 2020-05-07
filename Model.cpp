@@ -212,16 +212,24 @@ bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
     dvec3 uv = _Model->interpolate(barycentric, varyingUv[0], varyingUv[1], varyingUv[2]);
     dvec3 normal = _Model->interpolate(barycentric, varyingNormal[0], varyingNormal[1], varyingNormal[2]).unit();
 
-    CalculateTBN(uv, normal);
+    Matrix<double> TBN = CalculateTBN(uv, normal);
+
+    dvec3 tmp = _Model->sampleNormal(dvec2(uv.x, uv.y));
+    dvec3 disturbedNormal;
+    for (int i = 0; i < 3; i++)
+        disturbedNormal[i] = (float) tmp[i] / 255.f * 2.f - 1.f;
+
+    auto RN = TBN * disturbedNormal;
+    dvec3 resultNormal = dvec3(RN[0][0], RN[1][0], RN[2][0]).unit();
 
     dvec3 texColor = _Model->sampleDiffuse(dvec2(uv.x, uv.y));
-    dvec3 finalLight = texColor * std::max(0.0, normal.dot(_DirectionalLightDirection));
+    dvec3 finalLight = texColor * std::max(0.0, resultNormal.dot(_DirectionalLightDirection));
     color = TGAColor(std::min(finalLight.x, 255.0), std::min(finalLight.y, 255.0), std::min(finalLight.z, 255.0), 1);
 
     return false;
 }
 
-dvec3 GoroudShader::CalculateTBN(const dvec3 &uv, const dvec3 &normal) const {
+Matrix<double> GoroudShader::CalculateTBN(const dvec3 &uv, const dvec3 &normal) const {
     Matrix<double> A(3, 3);
     dvec3 deltaV1 = (varyingVertex[1] - varyingVertex[0]);
     dvec3 deltaV2 = (varyingVertex[2] - varyingVertex[0]);
@@ -243,14 +251,7 @@ dvec3 GoroudShader::CalculateTBN(const dvec3 &uv, const dvec3 &normal) const {
     A.setCol(B, 1);
     A.setCol(normal, 2);
 
-    dvec3 tmp = _Model->sampleNormal(dvec2(uv.x, uv.y));
-    dvec3 disturbedNormal;
-    for (int i = 0; i < 3; i++)
-        disturbedNormal[i] = (float) tmp[i] / 255.f * 2.f - 1.f;
-
-    auto RN = A * disturbedNormal;
-    dvec3 resultNormal = dvec3(RN[0][0], RN[1][0], RN[2][0]).unit();
-    return resultNormal;
+    return A;
 }
 
 GoroudShader::GoroudShader(Model *_Model, const dvec3 &_DirectionalLightDirection) : _Model(_Model),

@@ -103,7 +103,7 @@ Matrix<double> Render::vectorToMatrix(dvec3 vector) {
 }
 
 dvec3 Render::ClipSpaceToNDC(Matrix<double> M) {
-    if (M[3][0] == 0) return dvec3(0, 0, 0);
+    if (M[3][0] == 0) return dvec3(M[0][0], M[1][0], M[2][0]);
     return dvec3(M[0][0] / M[3][0], M[1][0] / M[3][0], M[2][0] / M[3][0]);
 }
 
@@ -147,15 +147,15 @@ void Render::triangleBarycentric(dvec3 *points, IShader *shader) {
 
     for (int x = minBounds.x; x <= maxBounds.x; ++x) {
         for (int y = minBounds.y; y <= maxBounds.y; ++y) {
-            dvec3 p = dvec3(x, y, 1);
+            dvec3 p = dvec3(x, y, 0);
             dvec3 barycentricP = barycentricCoordinates(points[0], points[1], points[2], p);
             if (barycentricP.x < 0 || barycentricP.y < 0 || barycentricP.z < 0) continue;
             p.z = barycentricP.x * points[0].z + barycentricP.y * points[1].z + barycentricP.z * points[2].z;
-            if (depthBuffer[y * width + x] < p.z) {
+            if (depthBuffer[(int) (y * width + x)] < p.z) {
                 TGAColor c;
                 bool discard = shader->fragmentShader(barycentricP, c);
                 if (discard) return;
-                depthBuffer[y * width + x] = p.z;
+                depthBuffer[(int) (y * width + x)] = p.z;
                 image.set(x, y, c);
             }
         }
