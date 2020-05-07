@@ -13,6 +13,7 @@ void loadModelAndRender() {
     m.loadObj("../african_head.obj");
     m.loadDiffuse("../african_head_diffuse.tga");
     m.loadNormal("../african_head_nm_tangent.tga");
+    m.loadSpecular("../african_head_spec.tga");
     m.renderModel();
 }
 

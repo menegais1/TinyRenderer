@@ -29,6 +29,11 @@ void Model::loadNormal(std::string filename) {
     normalTexture.flip_vertically();
 }
 
+void Model::loadSpecular(std::string filename) {
+    specularTexture.read_tga_file(filename.c_str());
+    specularTexture.flip_vertically();
+}
+
 void Model::readVertices(std::ifstream &file) {
     std::string x, y, z;
     std::string s;
@@ -121,7 +126,7 @@ void Model::readFaces(std::ifstream &file) {
 void Model::renderModel() {
     //   FlatShader *shader = new FlatShader(this, dvec3(255, 255, 255), (dvec3(0, 0, 1) - (dvec3(0, 0, 0))).unit(),
     //                                     dvec3(255, 255, 255));
-    GoroudShader *shader = new GoroudShader(this, (dvec3(1, 1, 1) - (dvec3(0, 0, 0))).unit());
+    GoroudShader *shader = new GoroudShader(this, (dvec3(1, 2, 1) - (dvec3(0, 0, 0))).unit());
     dvec3 verts[3];
     for (int i = 0; i < faces.size(); i++) {
         for (int j = 0; j < 3; ++j) {
@@ -172,6 +177,11 @@ dvec3 Model::sampleNormal(dvec2 uv) {
     return dvec3(c.r, c.g, c.b);
 }
 
+dvec3 Model::sampleSpecular(dvec2 uv) {
+    TGAColor c = specularTexture.get(uv.x * specularTexture.get_width(), uv.y * specularTexture.get_height());
+    return dvec3(c.r, c.g, c.b);
+}
+
 dvec3 FlatShader::vertexShader(int faceId, int vertexId) {
     Camera *c = Render::getInstance().camera;
 
@@ -207,11 +217,12 @@ dvec3 GoroudShader::vertexShader(int faceId, int vertexId) {
 }
 
 bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
+    Camera *c = Render::getInstance().camera;
     float lightIntensity = barycentric.dot(varyingLightIntensity);
 
     dvec3 uv = _Model->interpolate(barycentric, varyingUv[0], varyingUv[1], varyingUv[2]);
     dvec3 normal = _Model->interpolate(barycentric, varyingNormal[0], varyingNormal[1], varyingNormal[2]).unit();
-
+    dvec3 worldPos = _Model->interpolate(barycentric, varyingVertex[0], varyingVertex[1], varyingVertex[2]);
     Matrix<double> TBN = CalculateTBN(uv, normal);
 
     dvec3 tmp = _Model->sampleNormal(dvec2(uv.x, uv.y));
@@ -223,7 +234,13 @@ bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
     dvec3 resultNormal = dvec3(RN[0][0], RN[1][0], RN[2][0]).unit();
 
     dvec3 texColor = _Model->sampleDiffuse(dvec2(uv.x, uv.y));
-    dvec3 finalLight = texColor * std::max(0.0, resultNormal.dot(_DirectionalLightDirection));
+    dvec3 specSample = _Model->sampleSpecular(dvec2(uv.x, uv.y));
+    dvec3 perfectReflectionDirection =
+            (resultNormal * (2.0 * resultNormal.dot(_DirectionalLightDirection)) - _DirectionalLightDirection).unit();
+    float specIntensity = std::pow(std::max(0.0, perfectReflectionDirection.dot((c->cameraPos - worldPos).unit())),
+                                   specSample.z);
+    float diffuseIntensity = std::max(0.0, resultNormal.dot(_DirectionalLightDirection));
+    dvec3 finalLight = texColor * (1.0 * diffuseIntensity + .6f * specIntensity) + dvec3(5, 5, 5);
     color = TGAColor(std::min(finalLight.x, 255.0), std::min(finalLight.y, 255.0), std::min(finalLight.z, 255.0), 1);
 
     return false;

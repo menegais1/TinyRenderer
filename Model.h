@@ -30,12 +30,15 @@ public:
     std::vector<dvec3> verticesNormals;
     TGAImage diffuseTexture;
     TGAImage normalTexture;
+    TGAImage specularTexture;
 
     void loadObj(std::string filename);
 
     void loadDiffuse(std::string filename);
 
     void loadNormal(std::string filename);
+
+    void loadSpecular(std::string filename);
 
     void renderModel();
 
@@ -52,6 +55,8 @@ public:
     dvec3 sampleDiffuse(dvec2 uv);
 
     dvec3 sampleNormal(dvec2 uv);
+
+    dvec3 sampleSpecular(dvec2 uv);
 
 private:
     void readVertices(std::ifstream &file);
