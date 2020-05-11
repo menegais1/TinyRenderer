@@ -34,6 +34,8 @@ public:
 
     Model *_Model;
     dvec3 _DirectionalLightDirection;
+    float *_ShadowMap;
+    Matrix<double> _WorldToShadowMap;
 
     dvec3 varyingLightIntensity;
     dvec3 varyingUv[3];

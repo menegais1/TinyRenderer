@@ -23,6 +23,7 @@ public:
     TGAImage image;
     float *depthBuffer;
     float *shadowBuffer;
+    Matrix<double> worldToShadowMap;
 
     Camera *camera;
 

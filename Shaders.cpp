@@ -4,6 +4,7 @@
 
 #include "Shaders.h"
 #include "Render.h"
+#include <cmath>
 
 dvec3 FlatShader::vertexShader(int faceId, int vertexId) {
     Camera *c = Render::getInstance().camera;
@@ -59,9 +60,14 @@ bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
     dvec3 specSample = _Model->sampleSpecular(dvec2(uv.x, uv.y));
     dvec3 perfectReflectionDirection =
             (resultNormal * (2.0 * resultNormal.dot(_DirectionalLightDirection)) - _DirectionalLightDirection).unit();
-    float specIntensity = pow(std::max(0.0, perfectReflectionDirection.dot((c->cameraPos - worldPos).unit())),
-                              specSample.z);
+    double specIntensity = 0;
+    if (specSample.z != 0)
+        specIntensity = std::pow(
+                std::max(0.0, perfectReflectionDirection.dot((c->cameraPos - worldPos).unit())),
+                specSample.z / 1.0);
+
     float diffuseIntensity = std::max(0.0, resultNormal.dot(_DirectionalLightDirection));
+    if (diffuseIntensity == 0) specIntensity = 0;
     dvec3 finalLight = texColor * (1.0 * diffuseIntensity + .6f * specIntensity) + dvec3(5, 5, 5);
     color = TGAColor(std::min(finalLight.x, 255.0), std::min(finalLight.y, 255.0), std::min(finalLight.z, 255.0), 1);
 

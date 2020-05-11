@@ -143,7 +143,7 @@ void Render::triangleLineSweep(ivec2 p0, ivec2 p1, ivec2 p2, TGAColor color) {
     }
 }
 
-void Render::triangleBarycentric(dvec3 *points, IShader *shader, TGAImage image, float *depthBuffer) {
+void Render::triangleBarycentric(dvec3 *points, IShader *shader, TGAImage image, float *buffer) {
     dvec2 minBounds = getTriangleMinBounds(points[0], points[1], points[2]);
     dvec2 maxBounds = getTriangleMaxBounds(points[0], points[1], points[2]);
 

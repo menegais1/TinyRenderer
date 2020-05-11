@@ -124,19 +124,15 @@ void Model::readFaces(std::ifstream &file) {
     }
 }
 
-void Model::renderModel() {
-    //   FlatShader *shader = new FlatShader(this, dvec3(255, 255, 255), (dvec3(0, 0, 1) - (dvec3(0, 0, 0))).unit(),
-    //                                     dvec3(255, 255, 255));
-    dvec3 lightPosition = dvec3(1, 1, 0);
-    dvec3 lightDirection = (lightPosition - (dvec3(0, 0, 0))).unit();
+void Model::calculateShadowMap() {
     Camera *camera = Render::getInstance().camera;
+    dvec3 lightPosition = dvec3(1, 1, 0);
     camera->lookAt(lightPosition, dvec3(0, 0, 0), dvec3(0, 1, 0));
     camera->projection(-1.0 / (camera->cameraPos - camera->cameraPointOfInterest).length());
     camera->viewport(Render::width / 8.0, Render::height / 8.0, Render::width * 3.0 / 4.0, Render::height * 3.0 / 4.0);
-
     ShadowMapShader *shader = new ShadowMapShader(this);
-    //GoroudShader *shader = new GoroudShader(this, lightDirection);
     dvec3 verts[3];
+
     for (int i = 0; i < faces.size(); i++) {
         for (int j = 0; j < 3; ++j) {
             verts[j] = shader->vertexShader(i, j);
@@ -144,6 +140,34 @@ void Model::renderModel() {
 
         Render::getInstance().triangleBarycentric(verts, shader, Render::getInstance().image,
                                                   Render::getInstance().shadowBuffer);
+    }
+
+    Render::getInstance().worldToShadowMap = camera->Viewport * camera->Projection * camera->View;
+    delete shader;
+}
+
+void Model::renderModel() {
+    Camera *camera = Render::getInstance().camera;
+    dvec3 lightPosition = dvec3(0,1, 1);
+    dvec3 lightDirection = (lightPosition - (dvec3(0, 0, 0))).unit();
+
+  //  calculateShadowMap();
+    Render::getInstance().image.clear();
+    camera->lookAt(dvec3(1, 1, 3), dvec3(0, 0, 0), dvec3(0, 1, 0));
+    camera->projection(-1.0 / (camera->cameraPos - camera->cameraPointOfInterest).length());
+    camera->viewport(Render::width / 8.0, Render::height / 8.0, Render::width * 3.0 / 4.0, Render::height * 3.0 / 4.0);
+
+    GoroudShader *shader = new GoroudShader(this, lightDirection);
+    shader->_WorldToShadowMap = Render::getInstance().worldToShadowMap;
+    shader->_ShadowMap = Render::getInstance().shadowBuffer;
+    dvec3 verts[3];
+    for (int i = 0; i < faces.size(); i++) {
+        for (int j = 0; j < 3; ++j) {
+            verts[j] = shader->vertexShader(i, j);
+        }
+
+        Render::getInstance().triangleBarycentric(verts, shader, Render::getInstance().image,
+                                                  Render::getInstance().depthBuffer);
     }
     delete shader;
 }

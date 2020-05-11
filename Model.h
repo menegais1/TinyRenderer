@@ -65,6 +65,7 @@ private:
 
     void readFaces(std::ifstream &file);
 
+    void calculateShadowMap();
 };
 
 
