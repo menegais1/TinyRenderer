@@ -11,8 +11,10 @@ Render::Render() {
     camera = new Camera();
     image = TGAImage(width, height, TGAImage::RGB);
     depthBuffer = new float[width * height];
+    shadowBuffer = new float[width * height];
     for (int i = 0; i < width * height; ++i) {
         depthBuffer[i] = -100000;
+        shadowBuffer[i] = -100000;
     }
 }
 
@@ -141,12 +143,13 @@ void Render::triangleLineSweep(ivec2 p0, ivec2 p1, ivec2 p2, TGAColor color) {
     }
 }
 
-void Render::triangleBarycentric(dvec3 *points, IShader *shader) {
+void Render::triangleBarycentric(dvec3 *points, IShader *shader, TGAImage image, float *depthBuffer) {
     dvec2 minBounds = getTriangleMinBounds(points[0], points[1], points[2]);
     dvec2 maxBounds = getTriangleMaxBounds(points[0], points[1], points[2]);
 
     for (int x = minBounds.x; x <= maxBounds.x; ++x) {
         for (int y = minBounds.y; y <= maxBounds.y; ++y) {
+            if (x < 0 || y < 0 || x >= width || y >= height) continue;
             dvec3 p = dvec3(x, y, 0);
             dvec3 barycentricP = barycentricCoordinates(points[0], points[1], points[2], p);
             if (barycentricP.x < 0 || barycentricP.y < 0 || barycentricP.z < 0) continue;
@@ -156,7 +159,7 @@ void Render::triangleBarycentric(dvec3 *points, IShader *shader) {
                 bool discard = shader->fragmentShader(barycentricP, c);
                 if (discard) return;
                 depthBuffer[(int) (y * width + x)] = p.z;
-                image.set(x, y, c);
+                this->image.set(x, y, c);
             }
         }
     }

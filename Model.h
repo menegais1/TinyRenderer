@@ -110,4 +110,17 @@ public:
     Matrix<double> CalculateTBN(const dvec3 &uv, const dvec3 &normal) const;
 };
 
+class ShadowMapShader : public IShader {
+public:
+
+    Model *_Model;
+    dvec3 varyingVertex[3];
+
+    ShadowMapShader(Model *model);
+
+    dvec3 vertexShader(int faceId, int vertexId) override;
+
+    bool fragmentShader(dvec3 barycentric, TGAColor &color) override;
+};
+
 #endif //TINYRENDERER_MODEL_H

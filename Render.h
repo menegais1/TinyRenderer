@@ -21,9 +21,10 @@ public:
     static const int depth = 255;
 
     TGAImage image;
-    float* depthBuffer;
+    float *depthBuffer;
+    float *shadowBuffer;
 
-    Camera* camera;
+    Camera *camera;
 
     static Render &getInstance();
 
@@ -47,13 +48,14 @@ public:
     //Line sweep triangle generation algorithm
     void triangleLineSweep(ivec2 p0, ivec2 p1, ivec2 p2, TGAColor color);
 
-    void triangleBarycentric(dvec3 *points, IShader *shader);
+    void triangleBarycentric(dvec3 *points, IShader *shader, TGAImage image, float *depthBuffer);
 
     //Bresenham line algorithm implementation
     //Extra explanation: https://www.youtube.com/watch?v=IDFB5CDpLDE
     void line(dvec3 p0, dvec3 p1, TGAColor color);
 
     ~Render();
+
 private:
     dvec3 barycentricCoordinates(dvec3 p0, dvec3 p1, dvec3 p2, dvec3 p);
 

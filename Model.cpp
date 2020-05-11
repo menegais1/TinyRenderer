@@ -126,14 +126,23 @@ void Model::readFaces(std::ifstream &file) {
 void Model::renderModel() {
     //   FlatShader *shader = new FlatShader(this, dvec3(255, 255, 255), (dvec3(0, 0, 1) - (dvec3(0, 0, 0))).unit(),
     //                                     dvec3(255, 255, 255));
-    GoroudShader *shader = new GoroudShader(this, (dvec3(1, 2, 1) - (dvec3(0, 0, 0))).unit());
+    dvec3 lightPosition = dvec3(1, 1, 0);
+    dvec3 lightDirection = (lightPosition - (dvec3(0, 0, 0))).unit();
+    Camera *camera = Render::getInstance().camera;
+    camera->lookAt(lightPosition, dvec3(0, 0, 0), dvec3(0, 1, 0));
+    camera->projection(-1.0 / (camera->cameraPos - camera->cameraPointOfInterest).length());
+    camera->viewport(Render::width / 8.0, Render::height / 8.0, Render::width * 3.0 / 4.0, Render::height * 3.0 / 4.0);
+
+    ShadowMapShader *shader = new ShadowMapShader(this);
+    //GoroudShader *shader = new GoroudShader(this, lightDirection);
     dvec3 verts[3];
     for (int i = 0; i < faces.size(); i++) {
         for (int j = 0; j < 3; ++j) {
             verts[j] = shader->vertexShader(i, j);
         }
 
-        Render::getInstance().triangleBarycentric(verts, shader);
+        Render::getInstance().triangleBarycentric(verts, shader, Render::getInstance().image,
+                                                  Render::getInstance().shadowBuffer);
     }
     delete shader;
 }
@@ -246,6 +255,7 @@ bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
     return false;
 }
 
+//Code explanation: http://www.thetenthplanet.de/archives/1180
 Matrix<double> GoroudShader::CalculateTBN(const dvec3 &uv, const dvec3 &normal) const {
     Matrix<double> A(3, 3);
     dvec3 deltaV1 = (varyingVertex[1] - varyingVertex[0]);
@@ -275,3 +285,35 @@ GoroudShader::GoroudShader(Model *_Model, const dvec3 &_DirectionalLightDirectio
                                                                                      _DirectionalLightDirection(
                                                                                              _DirectionalLightDirection) {}
 
+dvec3 ShadowMapShader::vertexShader(int faceId, int vertexId) {
+    Camera *c = Render::getInstance().camera;
+    dvec3 vertex = _Model->vertex(faceId, vertexId);
+    //The original tutorial says that this transformation (c->Projection * c->View * vertex.toVector4(1)) maps to a unit cube [-1,1]x[-1,1]x[-1,1], this doesn't seem
+    //to happen, as the z coordinate gets mapped to [0x-d], 'd' defined by (camera->cameraPos - camera->cameraPointOfInterest).length(),
+    //This causes some problems when creating the shadow map, so need to look more into it.
+    dvec3 ndcVertex = Render::ClipSpaceToNDC(c->Viewport * c->Projection * c->View * vertex.toVector4(1));
+    varyingVertex[vertexId] = ndcVertex;
+    return ndcVertex;
+}
+
+bool ShadowMapShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
+    dvec3 vertex = _Model->interpolate(barycentric, varyingVertex[0], varyingVertex[1], varyingVertex[2]);
+    float intensity;
+    if ((vertex.z / Render::depth) > 1.f) {
+        intensity = 1.f;
+    } else {
+        if ((vertex.z / Render::depth) < 0.f) {
+            intensity = 0.f;
+        } else {
+            intensity = vertex.z /
+                        Render::depth;
+        }
+    }
+
+    color = TGAColor(255.0 * intensity);
+    //if (255.0 * -(vertex.z / Render::depth) > 230 || 255.0 * -(vertex.z / Render::depth) < 0)
+    //   std::cout << 255.0 * std::abs(vertex.z / Render::depth)) << std::endl;
+    return false;
+}
+
+ShadowMapShader::ShadowMapShader(Model *model) : _Model(model) {}
