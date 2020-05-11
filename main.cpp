@@ -10,10 +10,10 @@
 
 void loadModelAndRender() {
     Model m;
-    m.loadObj("../african_head.obj");
-    m.loadDiffuse("../african_head_diffuse.tga");
-    m.loadNormal("../african_head_nm_tangent.tga");
-    m.loadSpecular("../african_head_spec.tga");
+    m.loadObj("../obj/diablo/diablo3_pose.obj");
+    m.loadDiffuse("../obj/diablo/diablo3_pose_diffuse.tga");
+    m.loadNormal("../obj/diablo/diablo3_pose_nm_tangent.tga");
+    m.loadSpecular("../obj/diablo/diablo3_pose_spec.tga");
     m.renderModel();
 }
 

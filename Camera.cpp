@@ -41,7 +41,7 @@ Matrix<double> Camera::viewport(int x, int y, int w, int h) {
 
     Viewport[0][0] = w / 2.f;
     Viewport[1][1] = h / 2.f;
-    Viewport[2][2] = Render::depth / 2.f;
+    Viewport[2][2] = (Render::depth / 2.f) * (1.0 / (cameraPos - cameraPointOfInterest).length());
     return Viewport;
 }
 
