@@ -36,6 +36,8 @@ dvec3 GoroudShader::vertexShader(int faceId, int vertexId) {
     varyingVertex[vertexId] = _Model->vertex(faceId, vertexId);
     varyingNormal[vertexId] = _Model->normal(faceId, vertexId);
     varyingLightIntensity[vertexId] = std::max(0.0, normal.dot(_DirectionalLightDirection));
+    varyingNDCVertex[vertexId] = Render::ClipSpaceToNDC(c->Viewport * c->Projection * c->View * vertex.toVector4(1));
+    varyingClipSpaceToWorld = (c->Viewport * c->Projection * c->View).invert();
     return Render::ClipSpaceToNDC(c->Viewport * c->Projection * c->View * vertex.toVector4(1));
 }
 
@@ -46,6 +48,17 @@ bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
     dvec3 uv = _Model->interpolate(barycentric, varyingUv[0], varyingUv[1], varyingUv[2]);
     dvec3 normal = _Model->interpolate(barycentric, varyingNormal[0], varyingNormal[1], varyingNormal[2]).unit();
     dvec3 worldPos = _Model->interpolate(barycentric, varyingVertex[0], varyingVertex[1], varyingVertex[2]);
+
+    dvec3 shadowPos = _Model->interpolate(barycentric, varyingNDCVertex[0], varyingNDCVertex[1],
+                                          varyingNDCVertex[2]);
+    shadowPos = Render::ClipSpaceToNDC(_WorldToShadowMap * varyingClipSpaceToWorld * shadowPos.toVector4(1));
+    int idx = shadowPos.y * Render::width + shadowPos.x;
+    float shadowAmount = 0;
+    if (_ShadowMap[idx] > shadowPos.z +43.34) {
+        shadowAmount += 1;
+    } else {
+        shadowAmount = 0;
+    }
     Matrix<double> TBN = CalculateTBN(uv, normal);
 
     dvec3 tmp = _Model->sampleNormal(dvec2(uv.x, uv.y));
@@ -68,7 +81,13 @@ bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
 
     float diffuseIntensity = std::max(0.0, resultNormal.dot(_DirectionalLightDirection));
     if (diffuseIntensity == 0) specIntensity = 0;
-    dvec3 finalLight = texColor * (1.0 * diffuseIntensity + .6f * specIntensity) + dvec3(5, 5, 5);
+      dvec3 finalLight = texColor * shadowAmount * (1.2 * diffuseIntensity /*+ .6f * specIntensity*/) + dvec3(5, 5, 5);
+//    dvec3 finalLight = dvec3(_ShadowMap[idx],
+//                             _ShadowMap[idx],
+//                             _ShadowMap[idx]);
+//    dvec3 finalLight = dvec3(shadowPos.z ,
+//                             shadowPos.z ,
+//                             shadowPos.z );
     color = TGAColor(std::min(finalLight.x, 255.0), std::min(finalLight.y, 255.0), std::min(finalLight.z, 255.0), 1);
 
     return false;
@@ -108,7 +127,7 @@ dvec3 ShadowMapShader::vertexShader(int faceId, int vertexId) {
     Camera *c = Render::getInstance().camera;
     dvec3 vertex = _Model->vertex(faceId, vertexId);
     //The original tutorial says that this transformation (c->Projection * c->View * vertex.toVector4(1)) maps to a unit cube [-1,1]x[-1,1]x[-1,1], this doesn't seem
-    //to happen, as the z coordinate gets mapped to [0x-d], 'd' defined by (camera->cameraPos - camera->cameraPointOfInterest).length(),
+    //to happen, as the z coordinate gets mapped to [0,-d], 'd' defined by (camera->cameraPos - camera->cameraPointOfInterest).length(),
     //This causes some problems when creating the shadow map, so need to look more into it.
     dvec3 ndcVertex = Render::ClipSpaceToNDC(c->Viewport * c->Projection * c->View * vertex.toVector4(1));
     varyingVertex[vertexId] = ndcVertex;
@@ -119,8 +138,6 @@ bool ShadowMapShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
     dvec3 vertex = _Model->interpolate(barycentric, varyingVertex[0], varyingVertex[1], varyingVertex[2]);
     float intensity = vertex.z / Render::depth;
     color = TGAColor(255.0 * intensity);
-    //if (255.0 * -(vertex.z / Render::depth) > 230 || 255.0 * -(vertex.z / Render::depth) < 0)
-    //   std::cout << 255.0 * std::abs(vertex.z / Render::depth)) << std::endl;
     return false;
 }
 

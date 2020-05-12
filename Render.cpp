@@ -154,11 +154,11 @@ void Render::triangleBarycentric(dvec3 *points, IShader *shader, TGAImage image,
             dvec3 barycentricP = barycentricCoordinates(points[0], points[1], points[2], p);
             if (barycentricP.x < 0 || barycentricP.y < 0 || barycentricP.z < 0) continue;
             p.z = barycentricP.x * points[0].z + barycentricP.y * points[1].z + barycentricP.z * points[2].z;
-            if (depthBuffer[(int) (y * width + x)] < p.z) {
+            if (buffer[(int) (y * width + x)] < p.z) {
                 TGAColor c;
                 bool discard = shader->fragmentShader(barycentricP, c);
                 if (discard) return;
-                depthBuffer[(int) (y * width + x)] = p.z;
+                buffer[(int) (y * width + x)] = p.z;
                 this->image.set(x, y, c);
             }
         }

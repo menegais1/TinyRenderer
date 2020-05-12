@@ -124,9 +124,13 @@ void Model::readFaces(std::ifstream &file) {
     }
 }
 
+
+dvec3 lightPosition = dvec3(1, 1, 0);
+dvec3 lightDirection = (lightPosition - (dvec3(0, 0, 0))).unit();
+
+
 void Model::calculateShadowMap() {
     Camera *camera = Render::getInstance().camera;
-    dvec3 lightPosition = dvec3(1, 1, 0);
     camera->lookAt(lightPosition, dvec3(0, 0, 0), dvec3(0, 1, 0));
     camera->projection(-1.0 / (camera->cameraPos - camera->cameraPointOfInterest).length());
     camera->viewport(Render::width / 8.0, Render::height / 8.0, Render::width * 3.0 / 4.0, Render::height * 3.0 / 4.0);
@@ -148,12 +152,11 @@ void Model::calculateShadowMap() {
 
 void Model::renderModel() {
     Camera *camera = Render::getInstance().camera;
-    dvec3 lightPosition = dvec3(0,1, 1);
-    dvec3 lightDirection = (lightPosition - (dvec3(0, 0, 0))).unit();
 
-  //  calculateShadowMap();
+
+    calculateShadowMap();
     Render::getInstance().image.clear();
-    camera->lookAt(dvec3(1, 1, 3), dvec3(0, 0, 0), dvec3(0, 1, 0));
+    camera->lookAt(dvec3(1, 1, 4), dvec3(0, 0, 0), dvec3(0, 1, 0));
     camera->projection(-1.0 / (camera->cameraPos - camera->cameraPointOfInterest).length());
     camera->viewport(Render::width / 8.0, Render::height / 8.0, Render::width * 3.0 / 4.0, Render::height * 3.0 / 4.0);
 

@@ -41,7 +41,8 @@ public:
     dvec3 varyingUv[3];
     dvec3 varyingNormal[3];
     dvec3 varyingVertex[3];
-
+    dvec3 varyingNDCVertex[3];
+    Matrix<double> varyingClipSpaceToWorld;
 
     GoroudShader(Model *_Model, const dvec3 &_DirectionalLightDirection);
 
@@ -64,7 +65,5 @@ public:
 
     bool fragmentShader(dvec3 barycentric, TGAColor &color) override;
 };
-
-#include "Model.h"
 
 #endif //TINYRENDERER_SHADERS_H
