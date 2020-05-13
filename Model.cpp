@@ -125,7 +125,7 @@ void Model::readFaces(std::ifstream &file) {
 }
 
 
-dvec3 lightPosition = dvec3(1, 1, 0);
+dvec3 lightPosition = dvec3(0, 1, 1);
 dvec3 lightDirection = (lightPosition - (dvec3(0, 0, 0))).unit();
 
 

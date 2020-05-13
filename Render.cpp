@@ -152,12 +152,14 @@ void Render::triangleBarycentric(dvec3 *points, IShader *shader, TGAImage image,
             if (x < 0 || y < 0 || x >= width || y >= height) continue;
             dvec3 p = dvec3(x, y, 0);
             dvec3 barycentricP = barycentricCoordinates(points[0], points[1], points[2], p);
-            if (barycentricP.x < 0 || barycentricP.y < 0 || barycentricP.z < 0) continue;
+            if (barycentricP.x < 0 || barycentricP.y < 0 || barycentricP.z < 0 ||
+                barycentricP.z > 1 || barycentricP.x > 1 || barycentricP.y > 1)
+                continue;
             p.z = barycentricP.x * points[0].z + barycentricP.y * points[1].z + barycentricP.z * points[2].z;
             if (buffer[(int) (y * width + x)] < p.z) {
                 TGAColor c;
                 bool discard = shader->fragmentShader(barycentricP, c);
-                if (discard) return;
+                if (discard) continue;
                 buffer[(int) (y * width + x)] = p.z;
                 this->image.set(x, y, c);
             }

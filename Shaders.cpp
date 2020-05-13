@@ -52,12 +52,12 @@ bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
     dvec3 shadowPos = _Model->interpolate(barycentric, varyingNDCVertex[0], varyingNDCVertex[1],
                                           varyingNDCVertex[2]);
     shadowPos = Render::ClipSpaceToNDC(_WorldToShadowMap * varyingClipSpaceToWorld * shadowPos.toVector4(1));
-    int idx = shadowPos.y * Render::width + shadowPos.x;
-    float shadowAmount = 0;
-    if (_ShadowMap[idx] > shadowPos.z +43.34) {
-        shadowAmount += 1;
+    int idx = int(shadowPos.y) * Render::width + int(shadowPos.x);
+    float shadowAmount = 0.3;
+    if (_ShadowMap[idx] < shadowPos.z + 20) {
+        shadowAmount = 1;
     } else {
-        shadowAmount = 0;
+        shadowAmount = 0.3;
     }
     Matrix<double> TBN = CalculateTBN(uv, normal);
 
@@ -81,15 +81,8 @@ bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
 
     float diffuseIntensity = std::max(0.0, resultNormal.dot(_DirectionalLightDirection));
     if (diffuseIntensity == 0) specIntensity = 0;
-      dvec3 finalLight = texColor * shadowAmount * (1.2 * diffuseIntensity /*+ .6f * specIntensity*/) + dvec3(5, 5, 5);
-//    dvec3 finalLight = dvec3(_ShadowMap[idx],
-//                             _ShadowMap[idx],
-//                             _ShadowMap[idx]);
-//    dvec3 finalLight = dvec3(shadowPos.z ,
-//                             shadowPos.z ,
-//                             shadowPos.z );
+    dvec3 finalLight = texColor * shadowAmount * (1.2* diffuseIntensity + .6f * specIntensity) + dvec3(5, 5, 5);
     color = TGAColor(std::min(finalLight.x, 255.0), std::min(finalLight.y, 255.0), std::min(finalLight.z, 255.0), 1);
-
     return false;
 }
 
@@ -138,6 +131,7 @@ bool ShadowMapShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
     dvec3 vertex = _Model->interpolate(barycentric, varyingVertex[0], varyingVertex[1], varyingVertex[2]);
     float intensity = vertex.z / Render::depth;
     color = TGAColor(255.0 * intensity);
+    std::cout << "shadow" << std::endl;
     return false;
 }
 
