@@ -35,6 +35,11 @@ void Model::loadSpecular(std::string filename) {
     specularTexture.flip_vertically();
 }
 
+void Model::loadEmissionMap(std::string filename) {
+    emissionMap.read_tga_file(filename.c_str());
+    emissionMap.flip_vertically();
+}
+
 void Model::readVertices(std::ifstream &file) {
     std::string x, y, z;
     std::string s;
@@ -153,7 +158,6 @@ void Model::calculateShadowMap() {
 void Model::renderModel() {
     Camera *camera = Render::getInstance().camera;
 
-
     calculateShadowMap();
     Render::getInstance().image.clear();
     camera->lookAt(dvec3(1, 1, 4), dvec3(0, 0, 0), dvec3(0, 1, 0));
@@ -216,5 +220,10 @@ dvec3 Model::sampleNormal(dvec2 uv) {
 
 dvec3 Model::sampleSpecular(dvec2 uv) {
     TGAColor c = specularTexture.get(uv.x * specularTexture.get_width(), uv.y * specularTexture.get_height());
+    return dvec3(c.r, c.g, c.b);
+}
+
+dvec3 Model::sampleEmission(dvec2 uv) {
+    TGAColor c = emissionMap.get(uv.x * emissionMap.get_width(), uv.y * emissionMap.get_height());
     return dvec3(c.r, c.g, c.b);
 }

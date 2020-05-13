@@ -10,14 +10,16 @@
 
 void loadModelAndRender() {
     Model m;
-//    m.loadObj("../obj/diablo/diablo3_pose.obj");
-//    m.loadDiffuse("../obj/diablo/diablo3_pose_diffuse.tga");
-//    m.loadNormal("../obj/diablo/diablo3_pose_nm_tangent.tga");
-//    m.loadSpecular("../obj/diablo/diablo3_pose_spec.tga");
-    m.loadObj("../obj/african_head/african_head.obj");
-    m.loadDiffuse("../obj/african_head/african_head_diffuse.tga");
-    m.loadNormal("../obj/african_head/african_head_nm_tangent.tga");
-    m.loadSpecular("../obj/african_head/african_head_spec.tga");
+    m.loadObj("../obj/diablo/diablo3_pose.obj");
+    m.loadDiffuse("../obj/diablo/diablo3_pose_diffuse.tga");
+    m.loadNormal("../obj/diablo/diablo3_pose_nm_tangent.tga");
+    m.loadSpecular("../obj/diablo/diablo3_pose_spec.tga");
+    m.loadEmissionMap("../obj/diablo/diablo3_pose_glow.tga");
+
+//    m.loadObj("../obj/african_head/african_head.obj");
+//    m.loadDiffuse("../obj/african_head/african_head_diffuse.tga");
+//    m.loadNormal("../obj/african_head/african_head_nm_tangent.tga");
+//    m.loadSpecular("../obj/african_head/african_head_spec.tga");
 
     m.renderModel();
 }

@@ -81,7 +81,8 @@ bool GoroudShader::fragmentShader(dvec3 barycentric, TGAColor &color) {
 
     float diffuseIntensity = std::max(0.0, resultNormal.dot(_DirectionalLightDirection));
     if (diffuseIntensity == 0) specIntensity = 0;
-    dvec3 finalLight = texColor * shadowAmount * (1.2* diffuseIntensity + .6f * specIntensity) + dvec3(5, 5, 5);
+    dvec3 finalLight = texColor * shadowAmount * (1.2 * diffuseIntensity + .6f * specIntensity) + dvec3(5, 5, 5);
+    finalLight += _Model->sampleEmission(dvec2(uv.x, uv.y)) * 2;
     color = TGAColor(std::min(finalLight.x, 255.0), std::min(finalLight.y, 255.0), std::min(finalLight.z, 255.0), 1);
     return false;
 }

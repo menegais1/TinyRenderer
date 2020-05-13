@@ -29,6 +29,7 @@ public:
     TGAImage diffuseTexture;
     TGAImage normalTexture;
     TGAImage specularTexture;
+    TGAImage emissionMap;
 
     void loadObj(std::string filename);
 
@@ -37,6 +38,8 @@ public:
     void loadNormal(std::string filename);
 
     void loadSpecular(std::string filename);
+
+    void loadEmissionMap(std::string filename);
 
     void renderModel();
 
@@ -55,6 +58,8 @@ public:
     dvec3 sampleNormal(dvec2 uv);
 
     dvec3 sampleSpecular(dvec2 uv);
+
+    dvec3 sampleEmission(dvec2 uv);
 
 private:
     void readVertices(std::ifstream &file);
